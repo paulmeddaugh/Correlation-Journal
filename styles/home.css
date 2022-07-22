@@ -1,0 +1,41 @@
+canvas {
+    position: absolute;
+    width: 99%;
+    height: 99%;
+}
+
+.mainNote {
+    border: 1px solid black;
+    background-color: #f0eeef; /* rgb(255, 242, 171), #f5dec3 */
+    width: 100px;
+    height: 125px;
+    position: absolute;
+    padding: 3px;
+    transition: .5s ease;
+}
+
+.mainNote:hover {
+    width: 175px;
+    height: 219px;
+    transform: translate(calc(-(175px - 100px) / 2), calc(-(125px - 219px) / 2));
+}
+
+.stickyNote {
+    border: 1px solid black;
+    background-color: rgb(255, 247, 209); /* rgb(255, 242, 171) */
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    padding: 3px;
+    transition: .5s ease;
+}
+
+.stickyNote:hover {
+    width: 175px;
+    height: 175px;
+    transform: translate(-37.5px, -37.5px);
+}
+
+.noteTitle {
+    margin-bottom: 0px;
+}
