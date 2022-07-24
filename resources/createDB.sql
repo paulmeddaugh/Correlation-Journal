@@ -14,7 +14,7 @@ USE `Team4` ;
 
 -- -----------------------------------------------------------------
 
-DROP TABLE Team4.SupportingNotes;
+DROP TABLE Team4.Connections;
 DROP TABLE Team4.Notes;
 DROP TABLE Team4.Emotions;
 DROP TABLE Team4.Notebooks;
@@ -56,7 +56,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `Team4`.`Emotions` (
   `idEmotion` INT AUTO_INCREMENT,
   `name` VARCHAR(22) NOT NULL,
-  `idUser` INT NOT NULL,
+  `idUser` INT NULL,
   PRIMARY KEY (`idEmotion`),
   UNIQUE INDEX `idEmotion_UNIQUE` (`idEmotion` ASC),
   FOREIGN KEY (`idUser`)
@@ -90,18 +90,17 @@ CREATE TABLE IF NOT EXISTS `Team4`.`Notes` (
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `Team4`.`SupportingNotes`
+-- Table `Team4`.`Connections`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Team4`.`SupportingNotes` (
-  `idSupporting` INT NOT NULL,
-  `idMain` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Team4`.`Connections` (
+  `idNote1` INT NOT NULL,
+  `idNote2` INT NOT NULL,
   `idNotebook` INT NOT NULL,
   `idUser` INT NOT NULL,
-  PRIMARY KEY (`idSupporting`, `idMain`),
-  UNIQUE INDEX `idSupporting_UNIQUE` (`idSupporting` ASC),
-  FOREIGN KEY (`idSupporting`)
+  PRIMARY KEY (`idNote1`, `idNote2`),
+  FOREIGN KEY (`idNote1`)
     REFERENCES `Team4`.`Notes` (`idNote`),
-  FOREIGN KEY (`idMain`)
+  FOREIGN KEY (`idNote2`)
     REFERENCES `Team4`.`Notes` (`idNote`),
   FOREIGN KEY (`idNotebook`)
     REFERENCES `Team4`.`Notebooks` (`idNotebook`),

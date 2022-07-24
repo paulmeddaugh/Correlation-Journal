@@ -1,17 +1,18 @@
-INSERT INTO User (email, name, username, pwd, reminder)
-	VALUES ("paul.meddaugh@gmail.com", "Paul", "AtLongLast", "Thoughts", "Posted on Twitter");
-
 -- INSERT INTO User (email, name, username, pwd, reminder)
 -- 	VALUES ("paul.meddaugh@gmail.com", "Paul", "Batblast", "theBat42", "I'm Batman");
 
 INSERT INTO User (email, name, username, pwd, reminder)
 	VALUES ("joker@gmail.com", "Joker", "theJoker", "Hahahaha", "Want to see a magic trick?");
 
+INSERT INTO User (email, name, username, pwd, reminder)
+	VALUES ("paul.meddaugh@gmail.com", "Paul", "AtLongLast", "Thoughts", "Posted on Twitter");
+
 INSERT INTO Notebooks (idUser, name)
 	VALUES (1, "The first");
 
-INSERT INTO Notes (title, idEmotion, text, quotes, idNotebook, idUser)
-	VALUES ("Ding dong", null, "here's my song", "profound", 1, 1);
+INSERT INTO Notes (title, idEmotion, text, quotes, idNotebook, idUser, isMain)
+	VALUES ("You're cruel, you know", null, "to come here and speak of dreams. Yet here you are, 
+    watering my withered heart with your smile.", "- Your Lie In April", 1, 1, true);
 
 -- Gets all notes and supporting note ids of certain user
 SELECT idNote, title, idEmotion, date, text, quotes, n.idNotebook, s.idMain FROM Notes n 

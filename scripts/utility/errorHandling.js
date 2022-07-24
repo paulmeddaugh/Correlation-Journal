@@ -142,7 +142,7 @@ export function checkIfNoteProps (obj) {
     for (const o in obj) {
 
         let note = obj[o];
-        for (let prop of ['id', 'idEmotion', 'title', 'text', 'quotes', 'idNotebook', 'idMain']) {
+        for (let prop of ['id', 'idEmotion', 'title', 'text', 'quotes', 'idNotebook', 'isMain', 'dateCreated']) {
             if (!note.hasOwnProperty(prop)) {
                 throw new TypeError("'" + o + "' must have the properties of the 'Note' class.");
             }

@@ -1,6 +1,7 @@
 import Note from '../notes/note.js';
 import Notebook from '../notes/notebook.js';
 import Graph from './graph.js';
+import { removeNonSQLCharacters } from '../utility/utility.js';
 
 /**
  * Loads a user's notes into a graph from the database.
@@ -9,7 +10,7 @@ import Graph from './graph.js';
  * @param {function} callback The function to call when the AJAX request returns.
  * @param {number} idNotebook An optional parameter to narrow the notes returned to a notebook.
  */
-export function loadJournalGraph (idUser, callback, idNotebook) {
+export function loadJournal (idUser, callback, idNotebook) {
 
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -19,6 +20,8 @@ export function loadJournalGraph (idUser, callback, idNotebook) {
 
             let result = xhr.responseText;
             console.log(result);
+            result = removeNonSQLCharacters(result);
+            
             let jsonData = JSON.parse(result);
             let notes = jsonData.notes;
             let nbs = jsonData.notebooks;
@@ -27,7 +30,7 @@ export function loadJournalGraph (idUser, callback, idNotebook) {
             if (notes.length > 0) {
                 for (let noteData of notes) {
                     let note = new Note(noteData.idNote, noteData.title, noteData.idEmotion, noteData.text,
-                        noteData.quotes, noteData.idNotebook, noteData.idMain, noteData.date);
+                        noteData.quotes, noteData.idNotebook, noteData.isMain, noteData.dateCreated);
                     graph.addVertex(note);
 
                     if (noteData.idMain != null) { // Supporting note

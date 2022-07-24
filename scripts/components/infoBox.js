@@ -16,6 +16,7 @@ infoBoxTemplate.innerHTML = `
       </div>
       <div id="showing" class="configs">
         <select id="notebook" value="All Notebooks">
+        <option value="All Notebooks">All Notebooks</option>
         </select>
       </div>
     </div>
@@ -209,12 +210,8 @@ customElements.define('info-box-component', InfoBox);
 
 let active = null;
 
-export function addGraphToInfoBox (infoBox, graph) {
-  if (!(graph instanceof Graph)) {
-    throw new TypeError ("A 'Graph' object must be passed in to display info.");
-  }
-
-  for (let note of graph.getVertices()) {
+export function addNotesToInfoBox (infoBox, notes) {
+  for (let note of notes) {
     addNoteToInfoBox(infoBox, note, false);
   }
 }
@@ -239,7 +236,7 @@ export function addNoteToInfoBox (infoBox, note, first) {
     let date = document.createElement('small');
     // date.innerHTML = new Date(note.date.replace(/[\\n]/, ''))
     //   
-    date.innerHTML = new Date(note.date).toLocaleDateString('en-us', { month:"short", day:"numeric"});
+    date.innerHTML = new Date(note.dateCreated).toLocaleDateString('en-us', { month:"short", day:"numeric"});
     div.appendChild(title);
     div.appendChild(date);
 
@@ -256,7 +253,8 @@ export function addNoteToInfoBox (infoBox, note, first) {
       (active = e.currentTarget).classList.add('active');
     });
 
-    infoBox.shadowRoot.children[1].children[0].appendChild(a);
+    console.log(infoBox.shadowRoot.children[1].children[0]);
+    infoBox.shadowRoot.children[0].children[0].appendChild(a);
 }
 
 /**

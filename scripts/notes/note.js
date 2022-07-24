@@ -5,18 +5,18 @@ export default class Note {
     text;
     quotes;
     idNotebook;
-    idMain; // The id of the note that this note supports, if supporting
-    date;
+    isMain; // The id of the note that this note supports, if supporting
+    dateCreated;
 
-    constructor (id, title, idEmotion, text, quotes, idNotebook, idMain, date) {
+    constructor (id, title, idEmotion, text, quotes, idNotebook, isMain, dateCreated) {
         this.id = id;
         this.setTitle(title);
         this.idEmotion = idEmotion;
         this.setText(text);
         this.setQuotes(quotes);
         this.setIdNotebook(idNotebook);
-        this.setIdMain(idMain);
-        this.setDate(date);
+        this.setMain(isMain);
+        this.setDateCreated(dateCreated);
     }
 
     setTitle(title) {
@@ -31,11 +31,11 @@ export default class Note {
     setIdNotebook(idNotebook) {
         this.idNotebook = idNotebook;
     }
-    setIdMain(idMain) {
-        this.idMain = idMain;
+    setMain(main) {
+        this.isMain = main;
     }
-    setDate(date) {
-        this.date = date;
+    setDateCreated(date) {
+        this.dateCreated = new Date(date);
     }
 
     setEditables (title, text, quotes) {
