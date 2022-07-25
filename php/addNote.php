@@ -32,7 +32,7 @@
 		$row = $result2->fetch_assoc();
 		$idNotebook = $row["idNotebook"];
 
-		print "New notebook created.";
+		print "New notebook '$newNotebookName' created.\n";
 	}
 
 	$query = "INSERT INTO Notes (title, idEmotion, text, quotes, idNotebook, idUser)

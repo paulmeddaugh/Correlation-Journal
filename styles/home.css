@@ -1,7 +1,7 @@
 canvas {
     position: absolute;
-    width: 99%;
-    height: 99%;
+    width: 100%;
+    height: 100%;
 }
 
 .mainNote {
@@ -14,10 +14,26 @@ canvas {
     transition: .5s ease;
 }
 
+.connectionText {
+    position: absolute;
+    color: grey;
+    font-size: 7pt;
+    bottom: 100%;
+    right: 0%;
+    margin-bottom: 0;
+    padding-bottom: 4px;
+    opacity: 0;
+    transition: .5s ease;
+}
+
 .mainNote:hover {
     width: 175px;
     height: 219px;
-    transform: translate(calc((175px - 100px) / 2 * -1), calc((219px - 125px) / 2));
+    transform: translate(calc((175px - 100px) / -2), calc((219px - 125px) / -2));
+}
+
+.mainNote:hover .connectionText {
+    opacity: 1;
 }
 
 .stickyNote {
@@ -33,9 +49,13 @@ canvas {
 .stickyNote:hover {
     width: 125px;
     height: 125px;
-    transform: translate(calc((125px - 75px) / 2 * -1), calc((125px - 75px) / 2));
+    transform: translate(calc((125px - 75px) / -2), calc((125px - 75px) / -2));
 }
 
-.noteTitle {
+.mainNoteTitle {
     margin-bottom: 0px;
+}
+
+.mainNoteText {
+    text-overflow: ellipsis;
 }

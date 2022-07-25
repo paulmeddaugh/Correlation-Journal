@@ -204,11 +204,16 @@ class InfoBox extends HTMLElement {
 
 customElements.define('info-box-component', InfoBox);
 
-/* ------------
- * Functions for loading the notes into the infoBox
- * ------------ */
+/* //////////////
+ *      Functions for loading the notes into the infoBox
+ * /////////////*/
 
 let active = null;
+
+export function loadInfoBox(infoBox, notes, notebooks) {
+  addNotesToInfoBox(infoBox, notes);
+  addNotebooksToInfoBox(infoBox, notebooks);
+}
 
 export function addNotesToInfoBox (infoBox, notes) {
   for (let note of notes) {
@@ -253,20 +258,29 @@ export function addNoteToInfoBox (infoBox, note, first) {
       (active = e.currentTarget).classList.add('active');
     });
 
-    console.log(infoBox.shadowRoot.children[1].children[0]);
     infoBox.shadowRoot.children[0].children[0].appendChild(a);
 }
 
 /**
- * Adds the notebooks to the options of the notebook selector
+ * Adds the notebooks to the options of the notebook selector.
  * 
  * @param {*} infoBox The infoBox to add the notebooks to its notebook selector.
  * @param {*} notebooks The notebooks to add.
  */
 export function addNotebooksToInfoBox (infoBox, notebooks) {
   for (let notebook of notebooks) {
-    let option = document.createElement('option');
-    option.value = option.innerHTML = notebook.name;
-    infoBox.shadowRoot.getElementById('notebook').appendChild(option);
+    addNotebookToInfoBox(infoBox, notebook);
   }
+}
+
+/**
+ * Adds a notebook to the options of the notebook selector in the info side box.
+ * 
+ * @param {*} infoBox The infoBox to add the notebooks to its notebook selector.
+ * @param {*} notebook The notebook to add.
+ */
+export function addNotebookToInfoBox(infoBox, notebook) {
+  let option = document.createElement('option');
+  option.value = option.innerHTML = notebook.name;
+  infoBox.shadowRoot.getElementById('notebook').appendChild(option);
 }

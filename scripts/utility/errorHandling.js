@@ -136,16 +136,25 @@ export function checkIfNumbers(obj) {
  * Throws an error if the object does not hold properties of the Note class. The 
  * error thrown names the property key, which is checked objects are wrapped in an object.
  * 
- * @param {*} obj an object with property values to check (i.e. { str });
+ * @param {*} obj An object with property values to check (i.e. { str });
+ * @param {boolean} throwError A boolean of whether to throw an error if the object properties do not
+ * own {@link Note} properties.
+ * @returns True if containing {@link Note} properties and false otherwise.
  */
-export function checkIfNoteProps (obj) {
+export function checkIfNoteProps (obj, throwError) {
     for (const o in obj) {
 
         let note = obj[o];
-        for (let prop of ['id', 'idEmotion', 'title', 'text', 'quotes', 'idNotebook', 'isMain', 'dateCreated']) {
+        for (let prop in new Note()) {
             if (!note.hasOwnProperty(prop)) {
-                throw new TypeError("'" + o + "' must have the properties of the 'Note' class.");
+                if (throwError) {
+                    throw new TypeError("'" + o + "' must have the properties of the 'Note' class.");
+                } else {
+                    return false;
+                }
             }
         }
     }
+
+    return true;
 }

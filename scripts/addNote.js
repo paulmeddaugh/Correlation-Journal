@@ -1,16 +1,23 @@
 import Graph from '../scripts/graph/graph.js';
+import { loadJournal } from './graph/loadGraph.js';
 import Note from './notes/note.js';
-import { addNoteToInfoBox } from './components/infoBox.js';
+import { addNotebooksToInfoBox, addNotebookToInfoBox, addNoteToInfoBox } from './components/infoBox.js';
 import Point from './notes/point.js';
 import { removeNonSQLCharacters } from './utility/utility.js';
 
-let infoBox;
+let idUser = sessionStorage.getItem('uid');
 
-let notebook, title, text, quotes;
+let notebooks = new Map()
+let notes = new Map();
+
+let infoBox;
+let notebook, title, text, quotes; // inputs
 let quotesInitialFocus = true;
-let newNoteInitialBlur;
+
+let currentNoteIndex = 0;
 
 window.addEventListener("load", () => {
+
     infoBox = document.getElementsByTagName('info-box-component')[0];
     notebook = document.getElementById('notebook');
     title = document.getElementById('title');
@@ -18,13 +25,9 @@ window.addEventListener("load", () => {
 
     title.addEventListener("keydown", changeTab);
 
-    let newNote = new Note(null, "Untitled", null, "-", "", null);
+    let newNote = new Note(null, "(no title)", null, "-", "", null, true, new Date());
+    notes.set(0, newNote);
     addNoteToInfoBox(infoBox, newNote, true);
-
-    // Loads notes from databas
-    addNoteToInfoBox(infoBox, new Note(1, "Hello", null, "Workin", "Inspiring", 1), false);
-    addNoteToInfoBox(infoBox, new Note(2, "There", null, "Workin", "Inspiring", 1), false);
-    addNoteToInfoBox(infoBox, new Note(3, "Y", null, "Workin", "Inspiring", 1), false);
 
     (quotes = document.getElementById('quotes')).addEventListener("focus", (e) => {
         if (quotesInitialFocus) {
@@ -32,31 +35,53 @@ window.addEventListener("load", () => {
         }
     });
 
-    // Makes clicking a note in the infobox make note visible in the editor
-    let notes = infoBox.getElementsByClassName('list-group-flush')[0];
-    for (let i = 0; i < notes.children.length; i++) {
-        notes.children[i].addEventListener("click", () => {
-            if (i != 0) { // Not highlighting new note
-                if (newNoteInitialBlur) {
-                    newNote.setEditables(title.value, text.value, quotes.value);
-                    newNoteInitialBlur = false;
-                }
+    loadJournal(idUser, (g, nbs) => {
+
+        // Loads notes into infoBox, and additionally loads them into a Map
+        // with their keys as the child index in the infobox.
+        for (let i = 1, ns = g.getVertices(); i < ns.length + 1; i++) {
+            notes.set(i, new Note(ns[i - 1]));
+            addNoteToInfoBox(infoBox, ns[i - 1]);
+        }
+
+        for (let nb of nbs) {
+            notebooks.set(nb.id, nb.name);
+            addNotebookToInfoBox(infoBox, nb);
+        }
+
+        // Makes clicking a note in the infobox make note visible in the editor
+        const notesInBox = infoBox.shadowRoot.getElementById('infobox').children[0].children;
+
+        for (let i = 0; i < notesInBox.length - 2; i++) {
+            notesInBox[i + 2].addEventListener("click", () => {
+
+                // Updates values of the previous note on the front-end
+                const prevNote = notes.get(currentNoteIndex);
+                const existing = getNotebookIdFromName(notebook.value);
+                const nbId = existing ? existing : (notebook.value != "") ? notebook.value : "(no title)";
+                
+                prevNote.setEditables(nbId, null, title.value, text.value, quotes.value);
+
+                // Loads the selected note
+                const loadingNote = notes.get(i);
+                const exist = notebooks.get(loadingNote.idNotebook);
+                const nbName = exist ? exist : loadingNote.idNotebook;
                 setEditorInputs(
-                    notes.children[i].children[0].children[0].innerHTML,
-                    notes.children[i].children[1].innerHTML,
-                    ""
+                    (nbName && nbName != '(no title)') ? nbName : "",
+                    loadingNote.title,
+                    loadingNote.text,
+                    loadingNote.quotes
                 );
-                document.getElementById('addUpdate').value = 'Save Changes';
-            } else {
-                newNoteInitialBlur = true;
-                setEditorInputs(newNote.title, newNote.text, newNote.quotes);
-                document.getElementById('addUpdate').value = 'Add Note';
-            }
-        });
-    }
+
+                document.getElementById('addUpdate').value = (i == 0) ? 'Add Note' : 'Save Changes';
+                currentNoteIndex = i;
+            });
+        }
+    });
 });
 
-function setEditorInputs(newTitle, newText, newQuotes) {
+function setEditorInputs(notebookName, newTitle, newText, newQuotes) {
+    notebook.value = notebookName;
     title.value = newTitle;
     text.value = newText;
     quotes.value = newQuotes;
@@ -73,6 +98,16 @@ function changeTab(e) {
         text.focus();
         e.preventDefault();
     }
+}
+
+function getNotebookIdFromName(name) {
+    for (let [id, nbName] of notebooks) {
+        if (new String(nbName).toLowerCase() == new String(name).toLowerCase()) {
+            return id;
+        }
+    }
+
+    return false;  
 }
 
 function checkInputs() {
@@ -124,9 +159,15 @@ document.getElementsByTagName('form')[0].addEventListener("submit", async (e) =>
     }
 
     // Ask user if they're sure they want to add a new notebook if different
+    let nbId = getNotebookIdFromName(notebook.value);
+    if (!nb) {
+        if (!confirm(`Are you sure you want to create the new notebook '${notebook.value}'?`)) {
+            return false;
+        }
+    }
 
-    let params = "?idUser=".concat(sessionStorage.getItem("uid"))
-        .concat("&idNotebook=").concat(1)
+    let params = "?idUser=".concat(idUser)
+        .concat((nb) ? "&idNotebook=" : "&newNotebookName=").concat((nb) ? nbId : notebook.value)
         .concat('&title=').concat(removeNonSQLCharacters(title.value))
         .concat('&text=').concat(removeNonSQLCharacters(text.value))
         .concat('&quotes=').concat(removeNonSQLCharacters(quotes.value));

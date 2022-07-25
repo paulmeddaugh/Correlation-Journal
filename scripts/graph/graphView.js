@@ -1,6 +1,7 @@
 import Graph from './graph.js';
 import Note from '../notes/note.js';
 import Point from '../notes/point.js';
+import { checkIfNoteProps, checkIfPoints, checkIfString } from '../utility/errorHandling.js';
 
 let canvas;
 let ctx;
@@ -20,28 +21,26 @@ export function displayStickyNoteOnWall(note, point) {
  * @param {Point} point The point to place the note within the main content "Journal wall" area.
  */
 function displayOnWall(typeOfNote, note, point) {
-    if (!(note instanceof Note)) {
-        throw new TypeError ("A 'Note' object must be passed in to view on wall.");
-    }
 
-    if (!(point instanceof Point)) {
-        throw new TypeError("A point must be specified for the note to be viewable.");
-    }
+    checkIfString({ typeOfNote });
+    checkIfNoteProps({ note });
+    checkIfPoints({ point });
 
     let div = document.createElement('div');
     div.classList.add(typeOfNote + "Note");
     div.style.left = point.x + 'px';
     div.style.top = point.y + 'px';
 
-    let title = document.createElement('h5');
-    title.classList.add('noteTitle');
-    title.innerHTML = note.title;
+    addElement('h5', ['mainNoteTitle'], note.title);
+    addElement('p', ['mainNoteText'], note.text);
+    addElement('p', ['connectionText'], 'Drag from note to add connection');
 
-    let text = document.createElement('p');
-    text.innerHTML = note.text;
-
-    div.appendChild(title);
-    div.appendChild(text);
+    function addElement(elementTag, classNames, text) {
+        let element = document.createElement(elementTag);
+        classNames.forEach(val => element.classList.add(val));
+        element.innerHTML = text;
+        div.appendChild(element);
+    }
 
     document.getElementById('content').appendChild(div);
 }
@@ -49,8 +48,6 @@ function displayOnWall(typeOfNote, note, point) {
 window.addEventListener("load", () => {
     canvas = document.getElementById('background');
     ctx = canvas.getContext('2d');
-    
-    scaleToDPR();
 });
 
 /**
@@ -61,7 +58,7 @@ window.addEventListener("load", () => {
  * @param {Number} width The width to 'place' the canvas in. If not specified, defaults to #graphView width.
  * @param {Number} height The height to 'place' the canvas in. If not specified, defaults to #graphView height.
  */
- function scaleToDPR (width, height) {
+ export function scaleToDPR (width, height) {
     
     if (width === undefined) {
         width = canvas.getBoundingClientRect().width;

@@ -52,6 +52,6 @@ main {
 }
 
 p {
-    word-wrap: break-word;
+    /* word-wrap: break-word; */
     font-size: 10pt;
 }

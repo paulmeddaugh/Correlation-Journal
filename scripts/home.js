@@ -1,13 +1,19 @@
 import Graph from '../scripts/graph/graph.js';
 import Note from './notes/note.js';
-import { addNotesToInfoBox, addNotebooksToInfoBox } from './components/infoBox.js';
+import { addNotesToInfoBox, addNotebooksToInfoBox, loadInfoBox } from './components/infoBox.js';
 import Point from './notes/point.js';
-import { displayMainNoteOnWall, displayStickyNoteOnWall, addConnection } from '../scripts/graph/graphView.js'
+import { displayMainNoteOnWall, displayStickyNoteOnWall, addConnection, scaleToDPR } from '../scripts/graph/graphView.js'
 import { loadJournal } from './graph/loadGraph.js';
 
 let infoBox;
 let graph, notebooks;
 let idUser = sessionStorage.getItem('uid');
+
+const MAIN_NOTE_GAP_BEGIN = 150;
+const MAIN_NOTE_GAP = 200;
+const MAIN_NOTE_HEIGHT = 200;
+const STICKY_NOTE_RADIUS = 100;
+const STICKY_NOTE_MIN_GAP = 100;
 
 window.addEventListener("load", () => {
 
@@ -22,14 +28,29 @@ window.addEventListener("load", () => {
 
     loadJournal(idUser, (g, nbs) => {
 
-        addNotesToInfoBox(infoBox, (graph = g).getVertices());
-        addNotebooksToInfoBox(infoBox, (notebooks = nbs));
+        let notes = (graph = g).getVertices();
+        loadInfoBox(infoBox, notes, (notebooks = nbs));
+
+        for (let i = 0; i < notes.length; i++) {
+            let note = notes[i];
+            let gap = MAIN_NOTE_GAP_BEGIN + (i * MAIN_NOTE_GAP);
+            displayMainNoteOnWall(note, new Point(gap, MAIN_NOTE_HEIGHT));
+        }
 
         // Add notes to journal wall
-        displayMainNoteOnWall(n, new Point(400, 200));
-        displayMainNoteOnWall(n, new Point(150, 200));
-        displayStickyNoteOnWall(n, new Point(250, 50));
+        
+        // displayMainNoteOnWall(n, new Point(150, 200));
+        // displayStickyNoteOnWall(n, new Point(250, 50));
 
         addConnection(new Point(400, 200), new Point(300, 100));
+    
+        scaleToDPR();
     });
+});
+
+window.addEventListener("resize", () => {
+    let canvas = document.getElementById('background');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    scaleToDPR();
 });
