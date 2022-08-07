@@ -69,7 +69,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `Team4`.`Notes` (
   `idNote` INT AUTO_INCREMENT,
   `title` VARCHAR(500) NOT NULL,
-  `idEmotion` INT NULL,
+  `idEmotions` VARCHAR (250) NULL,
   `text` VARCHAR(30000) NOT NULL,
   `quotes` VARCHAR(30000) NOT NULL,
   `idNotebook` INT NOT NULL,
@@ -95,15 +95,12 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `Team4`.`Connections` (
   `idNote1` INT NOT NULL,
   `idNote2` INT NOT NULL,
-  `idNotebook` INT NOT NULL,
   `idUser` INT NOT NULL,
   PRIMARY KEY (`idNote1`, `idNote2`),
   FOREIGN KEY (`idNote1`)
     REFERENCES `Team4`.`Notes` (`idNote`),
   FOREIGN KEY (`idNote2`)
     REFERENCES `Team4`.`Notes` (`idNote`),
-  FOREIGN KEY (`idNotebook`)
-    REFERENCES `Team4`.`Notebooks` (`idNotebook`),
   FOREIGN KEY (`idUser`)
     REFERENCES `Team4`.`User` (`idUser`))
 ENGINE = InnoDB;

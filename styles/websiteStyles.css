@@ -2,7 +2,7 @@ html, body {
     height: 100%;
     width: 100%;
     margin: 0;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 body {
@@ -54,4 +54,5 @@ main {
 p {
     /* word-wrap: break-word; */
     font-size: 10pt;
+    /* max-height: 2rem; */
 }

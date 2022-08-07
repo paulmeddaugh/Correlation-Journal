@@ -12,6 +12,7 @@ canvas {
     position: absolute;
     padding: 3px;
     transition: .5s ease;
+    overflow: hidden;
 }
 
 .connectionText {
@@ -22,7 +23,7 @@ canvas {
     right: 0%;
     margin-bottom: 0;
     padding-bottom: 4px;
-    opacity: 0;
+    /* opacity: 0; */
     transition: .5s ease;
 }
 
@@ -54,6 +55,10 @@ canvas {
 
 .mainNoteTitle {
     margin-bottom: 0px;
+    overflow: hidden;
+    max-height: 3.3rem;
+    /* text-overflow: ellipsis; */
+    /* word-break: break-word; */
 }
 
 .mainNoteText {

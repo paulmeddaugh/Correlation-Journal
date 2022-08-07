@@ -1,4 +1,4 @@
-function chkIfAllFieldsEntered(event) {
+function chkIfAllFieldsEntered(e) {
 	var username = document.getElementById("Username");
 	var password = document.getElementById("Password");
 	
@@ -17,7 +17,7 @@ function chkIfAllFieldsEntered(event) {
 	if (error) {
 		alert(error);
 		focusObject.focus();
-
+		e.preventDefault();
 	} else {
 		// database query
 		let xhr = new XMLHttpRequest();
@@ -48,7 +48,7 @@ function chkIfAllFieldsEntered(event) {
 					}
 
 				} else {
-					console.log("Empty return json.");
+					alert('No users found with those credentials. Please have another go.');
 				}
 			}
 		}
@@ -57,3 +57,10 @@ function chkIfAllFieldsEntered(event) {
 		return false;
 	}
 }
+
+document.getElementById('Username').addEventListener("keydown", (e) => {
+	if (e.key != 'Enter') return;
+
+	document.getElementById('Password').focus();
+	e.preventDefault();
+});

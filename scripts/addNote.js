@@ -1,32 +1,45 @@
 import Graph from '../scripts/graph/graph.js';
-import { loadJournal } from './graph/loadGraph.js';
+import { loadJournal } from './graph/loadJournal.js';
 import Note from './notes/note.js';
-import { addNotebooksToInfoBox, addNotebookToInfoBox, addNoteToInfoBox } from './components/infoBox.js';
+import { addNotesClickListenersToInfoBox, addNotebooksToInfoBox, addNotebookToInfoBox, addNoteToInfoBox, 
+    selectNotebookListener } from './components/infoBox.js';
 import Point from './notes/point.js';
-import { removeNonSQLCharacters } from './utility/utility.js';
+import { stringToSQL } from './utility/utility.js';
 
 let idUser = sessionStorage.getItem('uid');
 
-let notebooks = new Map()
-let notes = new Map();
+let notebooks = new Map();
+let notes = [];
+let graph;
 
 let infoBox;
-let notebook, title, text, quotes; // inputs
+let notebook, title, text, quotes, isMain = true; // inputs
 let quotesInitialFocus = true;
+
+const STICKY_NOTE_COLOR = 'rgb(255, 247, 209)';
 
 let currentNoteIndex = 0;
 
 window.addEventListener("load", () => {
 
+    // Manually sets the height of the 'main' body to 100% - header
+    let header = document.getElementsByTagName('header-component')[0];
+    let main = document.getElementsByTagName('main')[0];
+    main.style.height = parseInt(window.getComputedStyle(document.body).height) 
+        - parseInt(window.getComputedStyle(header).height) + 'px';
+
     infoBox = document.getElementsByTagName('info-box-component')[0];
     notebook = document.getElementById('notebook');
     title = document.getElementById('title');
     text = document.getElementById('text');
+    let nbOptions = document.getElementById('notebookOptions');
 
-    title.addEventListener("keydown", changeTab);
+    title.addEventListener("keydown", changeTitleTab);
+    title.addEventListener("keyup", updateNewNoteInInfoBox);
+    text.addEventListener("keyup", updateNewNoteInInfoBox);
 
     let newNote = new Note(null, "(no title)", null, "-", "", null, true, new Date());
-    notes.set(0, newNote);
+    notes.push(newNote);
     addNoteToInfoBox(infoBox, newNote, true);
 
     (quotes = document.getElementById('quotes')).addEventListener("focus", (e) => {
@@ -37,46 +50,61 @@ window.addEventListener("load", () => {
 
     loadJournal(idUser, (g, nbs) => {
 
-        // Loads notes into infoBox, and additionally loads them into a Map
-        // with their keys as the child index in the infobox.
-        for (let i = 1, ns = g.getVertices(); i < ns.length + 1; i++) {
-            notes.set(i, new Note(ns[i - 1]));
-            addNoteToInfoBox(infoBox, ns[i - 1]);
-        }
+        graph = g;
 
+        // Loads notebooks
         for (let nb of nbs) {
             notebooks.set(nb.id, nb.name);
             addNotebookToInfoBox(infoBox, nb);
+
+            // Appends notebooks to the editor notebook selections
+            let option = document.createElement('option');
+            option.setAttribute('data-idNotebook', nb.id);
+            option.value = option.innerHTML = nb.name;
+            notebookOptions.appendChild(option);
         }
 
-        // Makes clicking a note in the infobox make note visible in the editor
-        const notesInBox = infoBox.shadowRoot.getElementById('infobox').children[0].children;
-
-        for (let i = 0; i < notesInBox.length - 2; i++) {
-            notesInBox[i + 2].addEventListener("click", () => {
-
-                // Updates values of the previous note on the front-end
-                const prevNote = notes.get(currentNoteIndex);
-                const existing = getNotebookIdFromName(notebook.value);
-                const nbId = existing ? existing : (notebook.value != "") ? notebook.value : "(no title)";
-                
-                prevNote.setEditables(nbId, null, title.value, text.value, quotes.value);
-
-                // Loads the selected note
-                const loadingNote = notes.get(i);
-                const exist = notebooks.get(loadingNote.idNotebook);
-                const nbName = exist ? exist : loadingNote.idNotebook;
-                setEditorInputs(
-                    (nbName && nbName != '(no title)') ? nbName : "",
-                    loadingNote.title,
-                    loadingNote.text,
-                    loadingNote.quotes
-                );
-
-                document.getElementById('addUpdate').value = (i == 0) ? 'Add Note' : 'Save Changes';
-                currentNoteIndex = i;
-            });
+        // Loads notes
+        for (let note of g.getVertices()) {
+            notes.push(new Note(note)); // Re-wraps the deep copy ('Object' now) to use Note functions
+            addNoteToInfoBox(infoBox, note);
         }
+
+        // Makes notes visible in the editor when clicked
+        addNotesClickListenersToInfoBox(infoBox, (i) => {
+
+            // Updates edited values of the previous note on the front-end
+            const prevNote = notes[currentNoteIndex];
+            let existingNb = getNotebookIdFromName(notebook.value);
+            const nbId = existingNb ? existingNb : (notebook.value == "") ? "(no title)" : notebook.value;
+            prevNote.setEditables(nbId, null, title.value, text.value, quotes.value);
+
+            // Loads the selected note in editor
+            const loadingNote = notes[i];
+            existingNb = notebooks.get(loadingNote.idNotebook);
+            const nbName = existingNb ? existingNb : loadingNote.idNotebook; // Stores new titles if no id
+            setEditorInputs(
+                (nbName && nbName != '(no title)') ? nbName : "",
+                loadingNote.title,
+                loadingNote.text,
+                loadingNote.quotes
+            );
+
+            // Displays note connections
+            document.getElementById('connections').innerHTML = '';
+
+            for (let edge of graph.getVertexNeighbors(Number(notes[i].id))) {
+                let canvas = document.createElement('canvas');
+                console.log(!!Number(edge.v.isMain));
+                drawConnectionCanvas(canvas, edge.v.title, true, Number(edge.v.isMain));
+                document.getElementById('connections').appendChild(canvas, document.getElementById('plus'));
+            }
+
+            document.getElementById('addUpdate').value = (i == 0) ? 'Add Note' : 'Save Changes';
+            currentNoteIndex = i;
+        });
+
+        document.getElementById('connectionsRow').appendChild(plus);
     });
 });
 
@@ -87,16 +115,78 @@ function setEditorInputs(notebookName, newTitle, newText, newQuotes) {
     quotes.value = newQuotes;
 }
 
-function changeTab(e) {
-    if (e.key != 'Enter') return;
+function drawConnectionCanvas (canvas, title, isMain) {
+    const ctx = canvas.getContext('2d');
+    const DPR = window.devicePixelRatio;
 
-    if (e.currentTarget.id == "title") {
+    console.log(isMain);
+
+    const yGap = 8;
+    const height = 20;
+    const lineY = 0|((height + yGap) / 2); // bit-operator removes decimal
+
+    const lineWidth = 8;
+    const width = lineWidth + (new String(title).length * 4.5);
+
+    // Scales the actual dimensions of the canvas to equal desired size in devicePixelRatio (less blurry)
+    canvas.height = height * DPR;
+    canvas.width = width * DPR;
+
+    // but style dimensions to the desired size
+    canvas.style.height = height + 'px';
+    canvas.style.width = width + 'px';
+
+    ctx.scale(DPR, DPR);
+    ctx.translate(-0.5, -0.5);
+
+    // Line to the note
+    ctx.beginPath();
+    ctx.moveTo(0, lineY);
+    ctx.lineTo(lineWidth, lineY);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Background of note
+    ctx.fillStyle = (isMain) ? 'lightgrey' : STICKY_NOTE_COLOR;
+    ctx.lineWidth = 1;
+    const p1 = new Point(lineWidth, yGap + 2), p2 = new Point(width - 8, height - 10);
+    ctx.fillRect(p1.x, p1.y, p2.x, p2.y);
+
+    // Border
+    ctx.strokeStyle = 'black';
+    ctx.strokeRect(p1.x, p1.y, p2.x, p2.y);
+
+    // Title
+    ctx.fillStyle = 'black';
+    ctx.fillText(title, lineWidth, 10 + yGap);
+}
+
+for (let radio of document.getElementsByClassName('form-check-input')) {
+    radio.addEventListener("click", (e) => {
+        const isChecked = e.currentTarget.checked;
+        isMain = (isChecked && e.currentTarget.id == 'main') ? true : false;
+        document.getElementById('editor').style.background = (isChecked && e.currentTarget.id == 'main') ? 
+            'white' : STICKY_NOTE_COLOR;
+    });
+}
+
+function changeTitleTab(e) {
+    if (e.key == 'Enter') {
         text.focus();
         e.preventDefault();
     }
-    if (e.currentTarget.id == "text") {
-        text.focus();
-        e.preventDefault();
+}
+
+function updateNewNoteInInfoBox(e) {
+    if (currentNoteIndex == 0) {
+        const id = e.currentTarget.id;
+        // Updates the new note element in infobox when inputs change
+        const el = (id == 'title') ?
+            infoBox.shadowRoot.getElementById('infobox').children[2].children[1].children[0].children[0] :
+            infoBox.shadowRoot.getElementById('infobox').children[2].children[1].children[1];
+        el.innerHTML = (id == 'title' && e.currentTarget.value == '') ? '(no title)' : 
+            (id == 'text' && e.currentTarget.value == '') ? '-' :
+            e.currentTarget.value;
     }
 }
 
@@ -111,28 +201,9 @@ function getNotebookIdFromName(name) {
 }
 
 function checkInputs() {
-    let error = "";
-    let focusObject = null;
     if (notebook.value == '') {
-        error = "Notebook";
-        focusObject = notebook;
-    }
-    if (title.value == '') {
-        error = (error) ? ", title" : "Title";
-        if (!focusObject) focusObject = title;
-    }
-    if (text.value == '') {
-        error = (error) ? ", note content" : "Note content";
-        if (!focusObject) focusObject = text;
-    }
-    if (quotes.value == '') {
-        error = (error) ? ", quotes" : "Quotes";
-        if (!focusObject) focusObject = text;
-    }
-
-    if (error) {
-        alert(error + " blank.");
-        focusObject.focus();
+        alert("Notebook must not be blank.");
+        notebook.focus();
         return false;
     }
 
@@ -140,9 +211,9 @@ function checkInputs() {
 }
 
 /**
- * The function called when the 'Add Note' submit button is clicked.
+ * The function called when the submit button is clicked.
  */
-document.getElementsByTagName('form')[0].addEventListener("submit", async (e) => {
+document.getElementsByTagName('form')[0].addEventListener("submit", (e) => {
 
     e.preventDefault();
 
@@ -160,19 +231,24 @@ document.getElementsByTagName('form')[0].addEventListener("submit", async (e) =>
 
     // Ask user if they're sure they want to add a new notebook if different
     let nbId = getNotebookIdFromName(notebook.value);
-    if (!nb) {
-        if (!confirm(`Are you sure you want to create the new notebook '${notebook.value}'?`)) {
+    if (!nbId) {
+        if (!confirm(`Are you sure you want to create new notebook '${notebook.value}'?`)) {
             return false;
         }
     }
 
     let params = "?idUser=".concat(idUser)
-        .concat((nb) ? "&idNotebook=" : "&newNotebookName=").concat((nb) ? nbId : notebook.value)
-        .concat('&title=').concat(removeNonSQLCharacters(title.value))
-        .concat('&text=').concat(removeNonSQLCharacters(text.value))
-        .concat('&quotes=').concat(removeNonSQLCharacters(quotes.value));
+        .concat((nbId) ? "&idNotebook=" : "&newNotebookName=").concat((nbId) ? nbId : notebook.value)
+        .concat('&title=').concat(stringToSQL((title.value == '') ? '(no title)' : title.value))
+        .concat('&text=').concat(stringToSQL((text.value == '') ? '-' : text.value))
+        .concat('&quotes=').concat(stringToSQL(quotes.value))
+        .concat('&isMain=').concat(isMain);
 
-    xhr.open("POST", "../php/addNote.php" + params, true);
+    if (document.getElementById('addUpdate').value == 'Save Changes') {
+        params = params.concat('&idNote=').concat(notes[currentNoteIndex].id);
+    }
+
+    xhr.open("POST", "../php/addUpdateNote.php" + params, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.send();
 

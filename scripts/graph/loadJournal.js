@@ -1,7 +1,7 @@
 import Note from '../notes/note.js';
 import Notebook from '../notes/notebook.js';
 import Graph from './graph.js';
-import { removeNonSQLCharacters } from '../utility/utility.js';
+import { stringToSQL, stringFromSQL } from '../utility/utility.js';
 
 /**
  * Loads a user's notes into a graph from the database.
@@ -10,7 +10,7 @@ import { removeNonSQLCharacters } from '../utility/utility.js';
  * @param {function} callback The function to call when the AJAX request returns.
  * @param {number} idNotebook An optional parameter to narrow the notes returned to a notebook.
  */
-export function loadJournal (idUser, callback, idNotebook) {
+export function loadJournal (idUser, callback, idNotebook, asDisplayableNotes) {
 
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -20,22 +20,28 @@ export function loadJournal (idUser, callback, idNotebook) {
 
             let result = xhr.responseText;
             console.log(result);
-            result = removeNonSQLCharacters(result);
+            result = stringToSQL(result);
             
-            let jsonData = JSON.parse(result);
-            let notes = jsonData.notes;
-            let nbs = jsonData.notebooks;
+            const jsonData = JSON.parse(result);
+            const notes = jsonData.notes;
+            const nbs = jsonData.notebooks;
+            const connections = jsonData.connections;
             
             // Loads user note data into the graph
             if (notes.length > 0) {
                 for (let noteData of notes) {
-                    let note = new Note(noteData.idNote, noteData.title, noteData.idEmotion, noteData.text,
-                        noteData.quotes, noteData.idNotebook, noteData.isMain, noteData.dateCreated);
-                    graph.addVertex(note);
+                    let note = new Note(noteData.idNote, stringFromSQL(noteData.title), noteData.idEmotion, 
+                        stringFromSQL(noteData.text), stringFromSQL(noteData.quotes), noteData.idNotebook, 
+                        noteData.isMain, noteData.dateCreated);
 
-                    if (noteData.idMain != null) { // Supporting note
-                        graph.addEdge(graph.getVertex(noteData.idMain), note);
-                    }
+                    graph.addVertex(note);
+                }
+            }
+
+            // Loads note connections into graph
+            if (connections.length > 0) {
+                for (let connection of connections) {
+                    graph.addEdge(graph.getVertex(connection.idNote1), graph.getVertex(connection.idNote2));
                 }
             }
 
@@ -54,6 +60,6 @@ export function loadJournal (idUser, callback, idNotebook) {
     let params = "?idUser=" + idUser;
     if (idNotebook) params += "&idNotebook=" + idNotebook;
 
-    xhr.open("GET", "../php/loadGraph.php" + params, true);
+    xhr.open("GET", "../php/loadJournal.php" + params, true);
     xhr.send();
 }

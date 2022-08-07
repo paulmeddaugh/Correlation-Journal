@@ -23,21 +23,35 @@
 
           <div class="flexRow">
             <img src="../resources/notebook.jfif" alt="notebook">
-            <input type="text" list="notebooks" id="notebook" placeholder="Notebook" />
-              <datalist id="notebooks">
-                <option>Volvo</option>
-                <option>Saab</option>
-                <option>Mercedes</option>
-                <option>Audi</option>
+            <input type="text" list="notebookOptions" id="notebook" placeholder="Notebook" />
+              <datalist id="notebookOptions">
               </datalist>
           </div>
-          
 
           <div id="editor">
               <input type="text" id="title" placeholder="Title" />
               <!-- <input type="image" alt="Emotion" id="emotion" />    When emotions are implemented -->
               <textarea id="text" placeholder="..."></textarea>
               <textarea id="quotes" placeholder="Quotes"></textarea>
+          </div>
+
+          <div class="radioRow">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="main" value="option1" checked>
+              <label class="form-check-label" for="main">Main Note</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="sticky" value="option2">
+              <label class="form-check-label" for="sticky">Sticky Note</label>
+            </div>
+          </div>
+
+          <div id="connectionsRow">
+            <label for="connections"> Connections:&nbsp; </label>
+            <div id="connections"></div>
+            <div class="connectionsPlus" id="plus">
+              <span class="plus">+</span>
+            </div>
           </div>
 
           <input type="submit" id="addUpdate" value="Add Note"/>

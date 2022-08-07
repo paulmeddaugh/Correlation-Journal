@@ -3,7 +3,7 @@ import Note from './notes/note.js';
 import { addNotesToInfoBox, addNotebooksToInfoBox, loadInfoBox } from './components/infoBox.js';
 import Point from './notes/point.js';
 import { displayMainNoteOnWall, displayStickyNoteOnWall, addConnection, scaleToDPR } from '../scripts/graph/graphView.js'
-import { loadJournal } from './graph/loadGraph.js';
+import { loadJournal } from './graph/loadJournal.js';
 
 let infoBox;
 let graph, notebooks;
@@ -42,7 +42,7 @@ window.addEventListener("load", () => {
         // displayMainNoteOnWall(n, new Point(150, 200));
         // displayStickyNoteOnWall(n, new Point(250, 50));
 
-        addConnection(new Point(400, 200), new Point(300, 100));
+        // addConnection(new Point(400, 200), new Point(300, 100));
     
         scaleToDPR();
     });

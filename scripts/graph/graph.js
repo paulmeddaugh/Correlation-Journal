@@ -15,8 +15,8 @@ class TwoEqualsMap extends Map {
         let get = super.get(key);
         if (get) return get;
 
-        /* Searches for the vertex by its name property if not found, as JavaScript Maps set keys that are
-         * objects to thier reference value. */
+        /* Searches for the vertex by its 'id' property if not found, as JavaScript Maps set their keys that 
+         * are objects to their reference value. */
         let id = (!isNaN(key)) ? key : 
             (key.hasOwnProperty('id')) ? key.id : null;
 
@@ -27,7 +27,7 @@ class TwoEqualsMap extends Map {
         }
 
         for (let [vertex, neighbors] of this) {
-            if (id === vertex.id) {
+            if (id == vertex.id) {
                 return neighbors;
             }
         }
@@ -54,7 +54,7 @@ class TwoEqualsMap extends Map {
         }
 
         for (let [vertex, neighbors] of this) {
-            if (id === vertex.id) {
+            if (id == vertex.id) {
                 return vertex;
             }
         }
@@ -150,21 +150,6 @@ export class Graph {
      * @param {*} v the vertex to add.
      */
     addVertex(v) {
-        let vHandlers = {
-            get(target, prop, receiver) {
-                const prim = Reflect.get(target, 'value');
-                const v = JSON.parse(prim);
-                console.log(v + ", " + prop);
-                //return typeof value === 'function' ? value.bind(prim) : value;
-                if (prop == 'name' || prop == 'x' || prop == 'y') {
-                    //console.log(JSON.parse(target)[prop]);
-                    return v[prop];
-                } else if (prop == 'value') {
-                    return v;
-                }
-                return Reflect.get(target, prop, receiver);
-            }
-        };
         this.neighbors.set(v, []);
     }
 
@@ -330,29 +315,58 @@ export class Graph {
     /**
      * Returns a vertex if existing. Returns false otherwise.
      * 
-     * @param {*} v The name or object of the vertex.
+     * @param {*} v The 'id' of the vertex or the vertex.
      * @returns The vertex if existing. Otherwise, returns false.
      */
     getVertex(v) {
         return this.neighbors.has(v);
     }
 
+    /**
+     * Returns all of the vertices of the graph in an array.
+     * 
+     * @returns The vertices of the graph as an array.
+     */
     getVertices () {
         return JSON.parse(JSON.stringify([...this.neighbors.keys()]));
     }
 
+    /**
+     * Returns the neighboring vertices of a vertex.
+     * 
+     * @param {*} v The 'id' of the vertex or the vertex.
+     * @returns The neighboring vertices of the vertex as an array.
+     */
     getVertexNeighbors(v) {
         return this.neighbors.get(v);
     }
 
+    /**
+     * Returns all of the neighbors of every vertex in the graph in an array.
+     * 
+     * @returns The neighboring arrays of all the vertices within an array.
+     */
     getNeighbors () {
         return JSON.parse(JSON.stringify([...this.neighbors.values()]));
     }
 
+    /**
+     * Returns the number of vertices in the graph.
+     * 
+     * @returns The size of the number of vertices in the graph.
+     */
     getSize() {
         return this.neighbors.size;
     }
 
+    /**
+     * Returns the 'weight' (or distance) of an edge (connection) in the graph if the edge has a weight.
+     * @param {*} u The first connecting vertex of the connection, using a relative index or the actual 
+     * vertex itself.
+     * @param {*} v The second connecting vertex of the connection, using a relative index or the actual 
+     * vertex itself.
+     * @returns The 'weight' (i.e. distance) of the edge.
+     */
     getWeight(u, v) {
         if (typeof u == 'number' && typeof v == 'number') {
             if (u < 0 || u >= this.neighbors.size) {

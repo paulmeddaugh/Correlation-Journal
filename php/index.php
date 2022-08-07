@@ -11,7 +11,9 @@
 	}
 	
 	// Submit the query for the list of folders
-	$query = "select idUser, username, pwd, name FROM Team4.User WHERE username = '$username' AND pwd = '$password'";
+	$query = "SELECT idUser, username, pwd, name 
+		FROM Team4.User 
+		WHERE username = '$username' AND pwd = '$password'";
 	
 	$result = mysqli_query($db, $query);
 	
