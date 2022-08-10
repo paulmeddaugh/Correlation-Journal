@@ -32,7 +32,7 @@ export function loadJournal (idUser, callback, idNotebook, asDisplayableNotes) {
                 for (let noteData of notes) {
                     let note = new Note(noteData.idNote, stringFromSQL(noteData.title), noteData.idEmotion, 
                         stringFromSQL(noteData.text), stringFromSQL(noteData.quotes), noteData.idNotebook, 
-                        noteData.isMain, noteData.dateCreated);
+                        !!Number(noteData.isMain), noteData.dateCreated);
 
                     graph.addVertex(note);
                 }
@@ -41,7 +41,8 @@ export function loadJournal (idUser, callback, idNotebook, asDisplayableNotes) {
             // Loads note connections into graph
             if (connections.length > 0) {
                 for (let connection of connections) {
-                    graph.addEdge(graph.getVertex(connection.idNote1), graph.getVertex(connection.idNote2));
+                    graph.addEdge(graph.getVertex(String(connection.idNote1)), 
+                        graph.getVertex(String(connection.idNote2)));
                 }
             }
 

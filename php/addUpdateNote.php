@@ -7,6 +7,8 @@
   $text = $_GET["text"];
   $quotes = $_GET["quotes"];
   $isMain = filter_var($_GET["isMain"], FILTER_VALIDATE_BOOLEAN);
+  $addConnections = isset($_GET["addConnections"]) ? json_decode($_GET["addConnections"], true) : null;
+  $deleteConnections = isset($_GET["removeConnections"]) ? json_decode($_GET["removeConnections"], true) : null;
   $idNote = isset($_GET["idNote"]) ? $_GET["idNote"] : null; // Updating a note
   
   // Connect to MySQL
@@ -39,20 +41,53 @@
 
 	$query = '';
 	$result = new stdClass();
-	if (!$idNote) {
+	if (!$idNote) { // Creates a new note
 		$query = "INSERT INTO Notes (title, idEmotion, text, quotes, idNotebook, idUser, isMain)
 			VALUES ('$title', null, '$text', '$quotes', '$idNotebook', '$idUser', '$isMain')";
 		$result = mysqli_query($db, $query);
-	} else {
+
+		// Gets the new note's id
+		$queryIdNote = "SELECT idNote FROM Notes ORDER BY idNote DESC LIMIT 1"; // Gets last inserted record
+		$idNote = mysqli_query($db, $queryIdNote)->fetch_assoc()["idNote"];
+
+	} else { // Updates a note
 		$query = "UPDATE Notes 
 			SET title = '$title', text = '$text', quotes = '$quotes', idNotebook = '$idNotebook', 
 				idUser = '$idUser', isMain = '$isMain'
 			WHERE idNote = '$idNote'";
 		$result = mysqli_query($db, $query);
 	}
-	
 
-	if (!$result) {
+	$connectionsArray = array_merge($addConnections, $deleteConnections);
+	$addConnectionsLen = count($addConnections);
+	$connectionsArrayLen = count($connectionsArray);
+	$connectionResult = true;
+
+	for($i = 0; $i < $connectionsArrayLen; $i++) {
+		$idNote1 = min($connectionsArray[$i], $idNote);
+		$idNote2 = max($connectionsArray[$i], $idNote);
+		
+		if ($i <= $addConnections) {
+			$query = "INSERT INTO Connections (idNote1, idNote2, idNotebook, idUser)
+				VALUES ('$idNote1', '$idNote2', '$idNotebook', '$idUser')";
+		} else {
+			$query = "DELETE FROM Connections 
+				WHERE idNote1 = '$idNote1' AND idNote2 = '$idNote2' AND idUser = '$idUser'";
+		}
+		
+		$result = mysqli_query($db, $query);
+	
+		if (!$result) {
+			print "Unable to " . (($i < $addConnectionsLen) ? "create connection" : "remove connection") .
+			" '$idNote1' to '$idNote2'.\n" .
+			mysqli_error($db);
+			$connectionResult = false;
+		} else {
+			print "Connection created from '$idNote1' to '$idNote2'\n";
+		}
+	}
+
+	if (!$result || !$connectionResult) {
 		print "Error: The note could not be " . ((!$idNote) ? "created.\n" : "updated.\n") . 
 		mysqli_error($db);
 		exit;

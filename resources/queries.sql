@@ -10,8 +10,15 @@ INSERT INTO User (email, name, username, pwd, reminder)
 INSERT INTO Notebooks (idUser, name)
 	VALUES (1, "The first");
 
-INSERT INTO Notes (title, idEmotion, text, quotes, idNotebook, idUser, isMain)
+INSERT IGNORE INTO Notes (title, idEmotion, text, quotes, idNotebook, idUser, isMain)
 	VALUES ("You\'re cruel, you know", null, "to come here and speak of dreams. Yet here you are, watering my withered heart with your smile.", "- Your Lie In April", 1, 1, true);
+
+INSERT IGNORE INTO Connections (idNote1, idNote2, idNotebook, idUser)
+	VALUES (11, 18, 1, 1);
+DELETE IGNORE FROM Connections WHERE idNote1 = 11 AND idNote2 = 18 AND idNotebook = 1 AND idUser = 1;
+
+-- URL for testing addUpdateNote.php
+-- http://localhost/thoughts/php/addUpdateNote.php?idUser=1&idNotebook=8&title=Yo%20Ho%20Ho&text=and%20a%20bottle%20a%27%27%20rum.&quotes=-%20Pirates%20of%20the%20Caribbean&isMain=false&addConnections=[%2211%22]&removeConnections=[]&idNote=19
 
 -- Gets all notes and supporting note ids of certain user
 SELECT idNote, title, idEmotion, date, text, quotes, n.idNotebook, s.idMain FROM Notes n 

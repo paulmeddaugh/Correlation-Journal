@@ -52,8 +52,7 @@ input[type="text"], textarea {
 }
 
 #text {
-    resize: none;
-    height: 42vh;
+    height: 38vh;
     font-size: 11pt;
 }
 
@@ -80,9 +79,21 @@ canvas {
     margin: 0px 5px;
 }
 
-.connectionsPlus {
+.canvasContainer {
+    display: inline-block;
+    padding: 5px;
+    border: 1px solid transparent;
+    transition: .5s ease;
+    position: relative;
+    /* border-radius: 2px; */
+}
+
+.canvasContainer:hover {
+    border: 1px solid;
+}
+
+.plusContainer {
     background-color: lightskyblue;
-    /* color: white; */
     height: 13px;
     width: 13px;
     display: -webkit-inline-box;
@@ -91,14 +102,72 @@ canvas {
     font-size: 15px;
     position: relative;
     top: 6px;
-    cursor: pointer;
-    /* border-radius: 1px; */
+    transition: 1s ease;
+    overflow: hidden;
+    margin-bottom: 0px;
 }
 
-.plus {
+.plusText {
     position: relative;
     top: -7px;
-    left: px;
+    left: 0%;
+    transition: ease;
+    cursor: pointer;
+}
+
+.expandConnectionPlus {
+    width: 200px;
+    height: 40px;
+}
+
+.minusText {
+    left: 94%;
+}
+
+#addingConnection {
+    width: 90%;
+    margin-left: 3px;
+    background: transparent;
+    border: none;
+    display: block;
+}
+
+#addingConnection:focus-visible {
+    outline: none;
+}
+
+option {
+    background: lightgray;
+}
+
+.removeConnection {
+    background-image: url("../resources/removeIcon.png");
+    background-size: contain;
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    border-bottom-color: white;
+    position: absolute;
+    top: 0%;
+    bottom: 0;
+    right: 0%;
+    z-index: 2;
+    padding: 3px;
+    visibility: hidden;
+    opacity: 0;
+    transition: .5s ease;
+}
+
+.canvasContainer:hover .removeConnection {
+    visibility: visible;
+    top: unset;
+    bottom: 100%;
+    opacity: 1;
+}
+
+.removeConnection:hover {
+    background-image: url("../resources/removeIconHover.png");
+    background-size: contain;
 }
 
 .form-check-input[type=radio] {

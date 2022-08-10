@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `Team4`.`User` (
   `username` VARCHAR(26) NOT NULL,
   `pwd` VARCHAR(15) NOT NULL,
   `reminder` VARCHAR(45) NOT NULL,
+  `dateCreated` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`idUser`),
   UNIQUE INDEX `idUser_UNIQUE` (`idUser` ASC),
   UNIQUE INDEX `username_UNIQUE` (`username` ASC))

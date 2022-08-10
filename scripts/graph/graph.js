@@ -1,65 +1,4 @@
-/**
- * TwoEqualsMap allows keys that are objects in the Map to be gotten (get()) by their 'name' value if not found 
- * by their object reference, and allows similar functionality for its has() function.
- */
-class TwoEqualsMap extends Map {
-
-    /** Searches for a value in the Map by firstly the key's reference value, then simply equaling 'name' 
-     * property. It additionally gets a key's value by a String of the key's 'name' property.
-     * 
-     * @param key the key to retrieve its value, searching by type of the actual key, its 'name' property, or 
-     * a String of the desired key's 'name' property.
-     * @returns the value that was set to match the key.
-     */
-    get(key) {
-        let get = super.get(key);
-        if (get) return get;
-
-        /* Searches for the vertex by its 'id' property if not found, as JavaScript Maps set their keys that 
-         * are objects to their reference value. */
-        let id = (!isNaN(key)) ? key : 
-            (key.hasOwnProperty('id')) ? key.id : null;
-
-        if (id == null) {
-            console.log(id);
-            throw new TypeError("The key must be an object with an equal 'id' property or the id " +
-                "as a Number.");
-        }
-
-        for (let [vertex, neighbors] of this) {
-            if (id == vertex.id) {
-                return neighbors;
-            }
-        }
-
-        return [];
-    }
-    /** Checks if a key exists in the Map by its reference value, then simply by equaling 'name' property. It 
-     * additionally can check by a String of the key's 'name' property.
-     * 
-     * @param key the key to check if existing in the Map, of type of either an object with equaling reference,
-     * 'name' property, or a String of the desired key's 'name' property.
-     * @returns the key, if found.
-     */
-    has(key) {
-
-        let has = super.has(key);
-        if (has) return key;
-
-        let id = (!isNaN(key)) ? key : (key.hasOwnProperty('id')) ? key.id : null;
-
-        if (!id) {
-            throw new TypeError("The \'key\' to search for must be an object with an equalling 'id'" 
-                + "property or a Number of the 'id'.");
-        }
-
-        for (let [vertex, neighbors] of this) {
-            if (id == vertex.id) {
-                return vertex;
-            }
-        }
-    }
-}
+import BinarySearchTree from "../utility/bst.js";
 
 /**
  * A data structure that stores an array of objects as keys in a Map, with their values holding an array
@@ -78,7 +17,8 @@ export class Graph {
      */
     constructor(multidirectional = true, vertices, edges) {
     
-        this.neighbors = new TwoEqualsMap();
+        this.verticies = [];
+        this.neighbors = new Map();
         this.setEdgeMultidirectional(multidirectional);
 
         // Adds vertices if passed in
@@ -111,19 +51,11 @@ export class Graph {
      * @returns the vertex at the relative index within neighbors.keys()
      */
     vertexAt(i) {
-        if (i < 0 || i >= this.neighbors.keys().length) {
+        if (i < 0 || i >= this.verticies.length) {
             throw new TypeError("Index " + i + " not within length of total vertices.");
         }
 
-        let count = 0;
-        for (let key of this.neighbors.keys()) {
-            if (count === i) {
-                return key;
-            }
-            count++;
-        }
-
-        return null;
+        return this.verticies[i];
     }
 
     /**
@@ -134,8 +66,8 @@ export class Graph {
      */
     indexOf(v) {
         let count = 0;
-        for (let key of this.neighbors.keys()) {
-            if (key === v) {
+        for (let vertex of this.verticies) {
+            if (vertex === v) {
                 return count;
             }
             count++;
@@ -150,7 +82,8 @@ export class Graph {
      * @param {*} v the vertex to add.
      */
     addVertex(v) {
-        this.neighbors.set(v, []);
+        this.verticies.push(v);
+        this.neighbors.set(v.id, new BinarySearchTree());
     }
 
     /**
@@ -160,7 +93,7 @@ export class Graph {
      */
     addVertices (vertices) {
         if (!(Array.isArray(vertices))) {
-            throw new TypeError("param 'vertices' must be an Array of vertices with 'x' and 'y' properties.");
+            throw new TypeError("param 'vertices' must be an Array.");
         } else {
             for (let vertex of vertices) {
                 this.addVertex(vertex);
@@ -176,16 +109,16 @@ export class Graph {
      * @param {*} v the second vertex, or the relative index to the vertex.
      * @returns true if the insertion was a success and false if not.
      */
-    addEdge(u, v, weight) {
+    addEdge(u, v, weight = null) {
 
         // adding by element
         if (isNaN(u) && isNaN(v)) {
 
-            if (this.neighbors.has(u)) {
+            if (this.neighbors.has(u.id) && this.neighbors.has(v.id)) {
 
-                this.neighbors.get(u).push({v: v, weight: (weight) ? weight : null});
+                this.neighbors.get(u.id).insert(v.id, weight);
                 if (this.multidirectional) {
-                    this.neighbors.get(v).push({v: u, weight: (weight) ? weight : null});
+                    this.neighbors.get(v.id).insert(u.id, weight);
                 }
 
                 return true;
@@ -205,9 +138,9 @@ export class Graph {
             let v1 = this.vertexAt(u);
             let v2 = this.vertexAt(v);
 
-            this.neighbors.get(v1).push({v: v2, weight: (weight) ? weight : null});
+            this.neighbors.get(v1.id).insert(v2.id, weight);
             if (this.multidirectional) {
-                this.neighbors.get(v2).push({v: v1, weight: (weight) ? weight : null});
+                this.neighbors.get(v2.id).insert(v1.id, weight);
             }
 
             return true;
@@ -241,14 +174,14 @@ export class Graph {
 
         let vertex = (isNaN(v)) ? v : this.vertexAt(v);
 
-        if (!(this.neighbors.has(v))) {
+        if (!(this.neighbors.has(v.id))) {
             throw new TypeError("v must be a vertex in the graph or an index to one.")
         }
 
         var found = false;
-        for (let edges of this.neighbors.get(vertex)) {
+        for (let edges of this.neighbors.get(vertex.id)) {
 
-            let neighborsEdges = this.neighbors.get(edges.v);
+            let neighborsEdges = this.neighbors.get(edges.v.id);
             for (let i = 0; i < neighborsEdges.length; i++) {
                 if (neighborsEdges[i].v == vertex) {
                     found = true;
@@ -262,7 +195,13 @@ export class Graph {
             found = false;
         }
 
-        this.neighbors.delete(vertex);
+        this.neighbors.delete(vertex.id);
+        this.verticies.find((v, i, arr) => {
+            if (v == vertex) {
+                arr.splice(i, i);
+                return true;
+            }
+        });
         
         return true;
     }
@@ -291,12 +230,12 @@ export class Graph {
             v2 = this.vertexAt(v);
         }
 
-        if (this.neighbors.has(v1) && this.neighbors.has(v2)) {
+        if (this.neighbors.has(v1.id) && this.neighbors.has(v2.id)) {
 
             let vertices = (this.multidirectional) ? [v1] : [v1, v2];
 
             for (let vertex of vertices) {
-                let edges = this.neighbors.get(vertex);
+                let edges = this.neighbors.get(vertex.id);
 
                 for (let i = edges.length; i >= 0; i--) { 
                     if (edges[i].v === v2) {
@@ -313,13 +252,17 @@ export class Graph {
     }
 
     /**
-     * Returns a vertex if existing. Returns false otherwise.
+     * Returns a vertex by index or its 'id' property as a String if existing. Returns false otherwise.
      * 
-     * @param {*} v The 'id' of the vertex or the vertex.
+     * @param {*} v The index of the vertex as a Number or 'id' of the vertex as a String.
      * @returns The vertex if existing. Otherwise, returns false.
      */
     getVertex(v) {
-        return this.neighbors.has(v);
+
+        if (typeof v == 'number') return this.verticies[v];
+        else if (typeof v == 'string') return this.verticies.find(vertex => v == vertex.id);
+
+        return false;
     }
 
     /**
@@ -328,17 +271,22 @@ export class Graph {
      * @returns The vertices of the graph as an array.
      */
     getVertices () {
-        return JSON.parse(JSON.stringify([...this.neighbors.keys()]));
+        return JSON.parse(JSON.stringify(this.verticies));
     }
 
     /**
      * Returns the neighboring vertices of a vertex.
      * 
-     * @param {*} v The 'id' of the vertex or the vertex.
-     * @returns The neighboring vertices of the vertex as an array.
+     * @param {*} v The index of the vertex as a Number, the 'id' of the vertex as a String, 
+     * or the vertex itself.
+     * @returns The neighboring 'id's of the vertex as an array in ascending order.
      */
     getVertexNeighbors(v) {
-        return this.neighbors.get(v);
+        if (typeof v == 'number') return this.neighbors.get(this.getVertex(v).id).inorder();
+        else if (typeof v == 'string') return this.neighbors.get(v.id).inorder();
+        else if (v.hasOwnProperty('id')) return this.neighbors.get(v.id).inorder();
+
+        return false;
     }
 
     /**
@@ -380,8 +328,8 @@ export class Graph {
             v = this.vertexAt(v);
         }
 
-        for (let edge of this.neighbors.get(u)) {
-                if (edge.v == v) {
+        for (let edge of this.neighbors.get(u.id)) {
+                if (edge.id == v.id) {
                     return edge.weight;
                 }
         }
@@ -421,12 +369,12 @@ export class Graph {
             v = this.vertexAt(v);
         }
 
-        for (let edge of this.neighbors.get(u)) {
+        for (let edge of this.neighbors.get(u.id)) {
             if (edge.v == v) {
                 Object.defineProperty(edge, 'weight', {value: weight});
             }
         }
-        for (let edge of this.neighbors.get(v)) {
+        for (let edge of this.neighbors.get(v.id)) {
             if (edge.v == u) {
                 Object.defineProperty(edge, 'weight', {value: weight});
                 return true;
@@ -439,8 +387,8 @@ export class Graph {
     print() {
         var i = 0;
         this.neighbors.forEach((edges, vertex) => {
-            let edgesString = (edges.length == 0) ? "-" : edges.reduce((prev, curr) => (prev.v) ? prev.v.name : prev + ", " + curr.v.name);
-            console.log("vertex[" + vertex.name + "]: x: " + vertex.x + ", y: " + vertex.y + " -> " + edgesString);
+            let edgesString = (edges.length == 0) ? "-" : edges.reduce((prev, curr) => (prev.v) ? prev.v.id : prev + ", " + curr.v.id);
+            console.log("vertex[" + vertex.id + "]: x: " + vertex.x + ", y: " + vertex.y + " -> " + edgesString);
             i++;
         });
     }

@@ -1,6 +1,7 @@
 <?php
     $idNote1 = $_POST["idNote1"];
     $idNote2 = $_POST["idNote2"];
+	$idUser = $_POST["idUser"];
     $action = $_POST["action"];
 
 	// Connect to MySQL
@@ -13,10 +14,11 @@
 	// Add or remove connection based on specified action parameter
     $query = '';
     if ($action == 'add') {
-        $query = "INSERT INTO Connections (idNote1, idNote2)
-            VALUES idNote1 = '$idNote1', idNote2 = '$idNote2'";
+        $query = "INSERT INTO Connections (idNote1, idNote2, idUser)
+            VALUES ('$idNote1', '$idNote2', '$idUser')";
     } else {
-        $query = "DELETE FROM Connections WHERE idNote1 = '$idNote1' AND idNote2 = '$idNote2'";
+        $query = "DELETE FROM Connections 
+			WHERE idNote1 = '$idNote1' AND idNote2 = '$idNote2' AND idUser = '$idUser'";
     }
     
 	$result = mysqli_query($db, $query);

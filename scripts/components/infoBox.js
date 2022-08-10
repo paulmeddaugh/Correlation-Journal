@@ -10,7 +10,7 @@ const infoBoxTemplate = document.createElement('template');
 infoBoxTemplate.innerHTML = `
   <div id="infobox">
     <div id="searchBar" class="configs">
-      <label for="searchingFor">Search:&nbsp;</label> 
+      <label for="searchingFor">Search:&nbsp;</label>
       <input type="text" list="noteOptions" id="searchingFor" placeholder="By Title, Content"/>
       <datalist id="noteOptions"></datalist>
       <div id="unpin"><img src="../resources/unpinIcon2.png" alt="unpin"></div>
@@ -221,11 +221,13 @@ infoBoxTemplate.innerHTML = `
     left: 89%;
     bottom: 5%;
     opacity: 0;
+    display: none;
     transition: .25s ease;
   }
 
   .removeNoteEntry {
     left: 92%;
+    display: block;
     opacity: 1;
   }
 

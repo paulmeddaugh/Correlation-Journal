@@ -58,9 +58,11 @@ function chkIfAllFieldsEntered(e) {
 	}
 }
 
-document.getElementById('Username').addEventListener("keydown", (e) => {
-	if (e.key != 'Enter') return;
+window.addEventListener("load", () => {
+	document.getElementById('Username').addEventListener("keydown", (e) => {
+		if (e.key != 'Enter') return;
 
-	document.getElementById('Password').focus();
-	e.preventDefault();
-});
+		document.getElementById('Password').focus();
+		e.preventDefault();
+	});
+})
