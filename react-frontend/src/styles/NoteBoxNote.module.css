@@ -1,0 +1,22 @@
+.removeNote {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: url('../resources/removeIcon.png');
+    background-size: cover;
+    left: 89%;
+    bottom: 5%;
+    opacity: 0;
+    transition: .25s ease;
+}
+
+.removeNote:hover {
+    background: url('../resources/removeIconHover.png');
+    background-size: cover;
+}
+
+.removeNoteEntry {
+    left: 92%;
+    display: block;
+    opacity: 1;
+}

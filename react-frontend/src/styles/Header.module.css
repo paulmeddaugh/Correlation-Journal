@@ -1,0 +1,10 @@
+.headerColor {
+    background-color: #0d0a42;
+}
+
+.infoBox {
+    border-right: 1px solid grey;
+    height: 100%;
+    background: grey;
+    opacity: .8;
+}
