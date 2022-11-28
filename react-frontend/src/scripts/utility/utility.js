@@ -24,17 +24,18 @@ export function stringFromSQL (string) {
 }
 
 /**
- * Binary searches through an array of objects with 'id' properties for the a specified 'id.'
- * O(log n) time complexity.
+ * Binary searches through an array of objects with 'id' properties for a specified 'id,' and by default
+ * skips the first index. Returns an empty array if not found. O(log n) time complexity.
  * 
  * @param {Array} arr The array of objects with 'id' properties.
  * @param {Number} id The id property value sought for in the array.
+ * @param {Number} skipFirst A number indicating the index to start the search in the array. Defaults to 0.
  * @returns An array containing the object with the 'id' value as first index and the index for 
  * the object in the array as second if found. Otherwise, returns an empty array.
  */
-export function binarySort(arr, id) {
+export function binarySearch(arr, id, skipTo = 0) {
 
-    let low = 1, high = arr.length - 1;
+    let low = skipTo, high = arr.length - 1;
     let mid = 0|(low + (high - low) / 2);
     let found = false;
 
@@ -52,6 +53,46 @@ export function binarySort(arr, id) {
     }
 
     return (found) ? [arr[mid], mid] : [];
+}
+
+/** 
+ * Binary inserts an object into an ordered array, with the ordering property defaulted to 'id': O(log n)
+ * 
+ * @return The array with the inserted value if successful. 
+ */
+export function binaryInsert (arr, obj, arrPropPath = 'v.id', objPropPath = 'id') {
+
+    const arrPath = arrPropPath?.split('.'), objPath = objPropPath?.split('.');
+    let objVal, i;
+
+    // Checks comparing obj value using objPropPath
+    for (objVal = obj, i = 0; i < objPath.length; i++) {
+        objVal = objVal[objPath[i]];
+        if (!obj) throw new TypeError('The object to insert must have a comparable property at the ' +
+            "objPropPath, which defaults to 'id'.");
+    }
+
+    let high = arr.length - 1, low = 0, mid = 0|(high / 2);
+    while (high >= low) {
+
+        // Gets comparing arr value from arr using arrPropPath
+        let arrVal;
+        for (arrVal = arr, i = -1; i < arrPath.length; i++) {
+            console.log(arrVal);
+            arrVal = (i === -1) ? arrVal[mid] : arrVal[arrPath[i]];
+        }
+
+        if (arrVal > objVal) { // less than mid
+            high = mid - 1;
+            mid = 0|(low + (high - low) / 2);
+        } else { // greater than mid
+            low = mid + 1;
+            mid = 0|(low + (high - low) / 2);
+        }
+    }
+
+    arr.splice(Math.max(low, high), 0, { v: obj });
+    return arr;
 }
 
 /**

@@ -1,0 +1,2 @@
+Loading border animation - https://web.dev/css-border-animations/
+Canvas in React - https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258

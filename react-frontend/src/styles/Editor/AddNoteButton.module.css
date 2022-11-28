@@ -1,0 +1,22 @@
+#add {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    background-image: url('../../resources/addButton.png');
+    background-size: contain;
+    border: none;
+    width: 25px;
+    height: 25px;
+    background-color: unset;
+    z-index: 4;
+}
+
+#add:active {
+    animation: 1.25s spin;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(720deg);
+    }
+}

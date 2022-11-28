@@ -18,16 +18,16 @@ export default function loadJournal (idUser, callback, idNotebook, asDisplayable
     axios.get('/api/users/' + idUser + '/getJournal').then((response) => {
         let graph = new Graph(), notebooks = [];
 
-        const nbs = response.data._embedded.collectionModelList[0]?._embedded.notebookList;
-        const notes = response.data._embedded.collectionModelList[1]?._embedded.noteList;
-        const connections = response.data._embedded.collectionModelList[2]?._embedded.connectionList;
+        const nbs = response.data._embedded.collectionModelList[0]._embedded?.notebookList;
+        const notes = response.data._embedded.collectionModelList[1]._embedded?.noteList;
+        const connections = response.data._embedded.collectionModelList[2]._embedded?.connectionList;
 
         // Loads user note data into the graph
         if (notes) {
             for (let noteData of notes) {
                 let note = new Note(noteData.id, stringFromSQL(noteData.title), 
                     stringFromSQL(noteData.text), stringFromSQL(noteData.quotes), noteData.idNotebook, 
-                    !!Number(noteData.isMain), noteData.dateCreated);
+                    !!Number(noteData.main), noteData.dateCreated);
 
                 graph.addVertex(note);
             }

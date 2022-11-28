@@ -161,7 +161,7 @@
                 }
             }
 
-            neighborsArr.splice(Math.max(low, high), 0, {v: v, weight: weight });
+            neighborsArr.splice(Math.max(low, high), 0, {v: { id: v.id }, weight: weight });
         }
 
         return false;
@@ -185,12 +185,13 @@
      * Removes a vertex from the graph by a parameter of either the vertex itself or the 
      * relative index of the vertex.
      * 
-     * @param {*} v The vertex or index of the vertex to remove.
+     * @param {*} v The vertex or index as a Number of the vertex to remove.
      * @returns true if the element was successfully removed and false if not.
      */
     removeVertex(v) {
 
-        let vertex = (isNaN(v) && v?.hasOwnProperty('id')) ? v : this.vertexAt(v);
+        const i = (typeof v === 'number') ? v : null;
+        let vertex = (v?.hasOwnProperty('id')) ? v : this.vertexAt(i);
 
         if (!(this.neighbors.has(vertex?.id))) {
             throw new TypeError("v must be a vertex in the graph or an index to one.");
@@ -221,21 +222,28 @@
         }
 
         this.neighbors.delete(vertex.id);
-        this.verticies.find((ver, i, arr) => {
-            if (ver.id === vertex.id) {
-                arr.splice(i, 1);
-                return true;
-            }
-        });
+
+        // Removes vertex
+        if (i) {
+            this.verticies.splice(i, 1);   
+        } else {
+            this.verticies.find((ver, i, arr) => {
+                if (ver.id === vertex.id) {
+                    arr.splice(i, 1);
+                    return true;
+                }
+            });
+        }
         
         return true;
     }
 
     /**
      * Removes an edge from the graph.
-     * @param {*} u the first index of the vertex the edge is to incident to.
-     * @param {*} v the second index the edge is to incident to.
-     * @returns true if successfully removed and false if not.
+     * 
+     * @param {*} u The first index of a vertex, or a vertex itself, that the edge connects to.
+     * @param {*} v The second index of a vertex, or a vertex itself, that the edge connects to.
+     * @returns True if successfully removed, false if otherwise.
      */
     removeEdge(u, v) {
 
@@ -257,14 +265,15 @@
 
         if (this.neighbors.has(v1.id) && this.neighbors.has(v2.id)) {
 
-            let vertices = (this.multidirectional) ? [v1] : [v1, v2];
+            const vertices = (this.multidirectional) ? [v1, v2] : [v1];
 
             for (let vertex of vertices) {
-                let edges = this.neighbors.get(vertex.id);
+                const edges = this.neighbors.get(vertex.id);
+                const oppV = (vertex === v1) ? v2 : v1;
 
-                for (let i = edges.length; i >= 0; i--) { 
-                    if (edges[i].v === v2) {
-                        edges[i].splice(i, i);
+                for (let i = edges.length - 1; i >= 0; i--) { 
+                    if (edges[i].v.id === oppV.id) {
+                        edges.splice(i, 1);
                         break; // doesn't check for duplicates in edges
                     }
                 }
@@ -277,9 +286,10 @@
     }
 
     /**
-     * Returns a vertex by index or its 'id' property as a String if existing. Returns false otherwise.
+     * Returns a vertex by its index as a Number, or its 'id' property as a String, if existing. Returns 
+     * false otherwise.
      * 
-     * @param {*} v The index of the vertex as a Number or 'id' of the vertex as a String.
+     * @param {*} v The index of the vertex as a Number, or the 'id' of the vertex as a String.
      * @returns The vertex if existing. Otherwise, returns false.
      */
     getVertex(v) {
@@ -307,11 +317,11 @@
      * @returns The neighboring 'id's of the vertex as an array in ascending order.
      */
     getVertexNeighbors(v) {
-        if (typeof v == 'number') return this.neighbors.get(this.getVertex(v).id);
-        else if (typeof v == 'string') return this.neighbors.get(v.id);
-        else if (v.hasOwnProperty('id')) return this.neighbors.get(v.id);
+        if (typeof v == 'number') return this.neighbors.get(this.getVertex(v)?.id)?.concat();
+        else if (typeof v == 'string') return this.neighbors.get(v?.id)?.concat();
+        else if (v?.hasOwnProperty('id')) return this.neighbors.get(v?.id)?.concat();
 
-        return false;
+        return null;
     }
 
     /**
