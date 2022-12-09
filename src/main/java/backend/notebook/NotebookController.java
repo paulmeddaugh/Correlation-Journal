@@ -50,7 +50,7 @@ public class NotebookController {
     }
     // end::get-aggregate-root[]
     
-    @PostMapping("/notebooks/newNotebook")
+    @PostMapping("/notebooks/new")
     Notebook newNotebook(@RequestBody Notebook newNotebook) {
         return repository.save(newNotebook);
     }
@@ -64,7 +64,7 @@ public class NotebookController {
         return assembler.toModel(Notebook);
     }
     
-    @PutMapping("/notebooks/{id}/updateNotebook")
+    @PutMapping("/notebooks/{id}/update")
     Notebook replaceNotebook(@RequestBody Notebook newNotebook, @PathVariable Long id) {
         return repository.findById(id)
             .map(Notebook -> {
@@ -78,7 +78,7 @@ public class NotebookController {
             });
     }
     
-    @DeleteMapping("/notebooks/{id}/deleteNotebook")
+    @DeleteMapping("/notebooks/{id}/delete")
     void deleteNotebook(@PathVariable Long id) {
         
         noteRepository.findByIdNotebook((int) (long) id)

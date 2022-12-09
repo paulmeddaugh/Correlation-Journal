@@ -33,7 +33,7 @@ public class LoadDatabase {
 			// Notebooks
 			log.info("Preloading " + notebookRep.save(new Notebook(1, "You're Lie In April")));
 			log.info("Preloading " + notebookRep.save(new Notebook(1, "Pirates of the Carribean")));
-			log.info("Preloading " + notebookRep.save(new Notebook(2, "Need For Speed")));
+			log.info("Preloading " + notebookRep.save(new Notebook(2, "Violet Evergarden")));
 			
 			// Notes
 			log.info("Preloading " + noteRep.save(
@@ -43,9 +43,17 @@ public class LoadDatabase {
 			                "- You're Lie In April", 1, 1, true)));
 			log.info("Preloading " + noteRep.save(
                     new Note("My heart", "will always belong to you.", "- Davey Jones", 1, 2, true)));
+			log.info("Preloading " + noteRep.save(
+                    new Note("I am burning", "for the things I have done.",
+                            "- Violet", 2, 1, true)));
+            log.info("Preloading " + noteRep.save(
+                    new Note("It's not that,", "it's just that I did not think you would "
+                            + "like my answer", "- Violet", 2, 1, true)));
 
 			// Connections
-			log.info("Preloading " + connRep.save(new Connection(1, 2, 1)));
+			//log.info("Preloading " + connRep.save(new Connection(1, 2, 1)));
+			log.info("Preloading " + connRep.save(new Connection(2, 3, 1)));
+			log.info("Preloading " + connRep.save(new Connection(1, 2, 2)));
 		};
 	}
 }

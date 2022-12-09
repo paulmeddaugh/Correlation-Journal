@@ -48,7 +48,7 @@ public class NoteController {
     }
     // end::get-aggregate-root[]
     
-    @PostMapping("/notes/newNote")
+    @PostMapping("/notes/new")
     Note newNote(@RequestBody Note newNote) {
         return repository.save(newNote);
     }
@@ -62,7 +62,7 @@ public class NoteController {
         return assembler.toModel(note);
     }
     
-    @PutMapping("/notes/{id}/updateNote")
+    @PutMapping("/notes/{id}/update")
     Note replaceNote(@RequestBody Note newNote, @PathVariable Long id) {
         return repository.findById(id)
             .map(Note -> {
@@ -81,7 +81,7 @@ public class NoteController {
             });
     }
     
-    @DeleteMapping("/notes/{id}/deleteNote")
+    @DeleteMapping("/notes/{id}/delete")
     void deleteNote(@PathVariable Long id) {
         repository.deleteById(id);
     }

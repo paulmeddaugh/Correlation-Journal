@@ -9,7 +9,7 @@ import backend.notebook.Notebook;
 
 @Repository
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
-    List<Connection> findByIdNote1AndIdNote2(int idNote1, int idNote2);
-    Connection deleteByIdNote1AndIdNote2(int idNote1, int idNote2);
+    List<Connection> findByIdNote1AndIdNote2AndIdUser(int idNote1, int idNote2, int idUser);
+    List<Connection> deleteByIdNote1AndIdNote2AndIdUser(int idNote1, int idNote2, int idUser);
     List<Connection> findByIdUser(int idUser);
 }
