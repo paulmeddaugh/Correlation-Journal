@@ -1,24 +1,45 @@
-import { useEffect } from 'react';
+import { useEffect, forwardRef, useRef } from 'react';
+import Point from '../../scripts/notes/point';
 import styles from '../../styles/JournalWall/Note.module.css';
 
-const Note = ({ noteAndIndex, point, onClick, onMount, selected }) => {
+const tackImg = require('../../resources/tack.png');
+
+const Note = ({ noteAndIndex, onClick, onMount, isSelected, inlineStyle, isConnection }, ref) => {
+
+    const noteRef = useRef(null);
 
     useEffect(() => {
-        onMount(noteAndIndex.note, noteAndIndex.index, point);
+        const point = (inlineStyle?.left && inlineStyle?.top) ?
+            new Point(inlineStyle.left, inlineStyle.top) : null;
+        const { left, top } = noteRef?.current?.getBoundingClientRect();
+        onMount?.(noteAndIndex.note, noteAndIndex.index, new Point(left, top));
     }, []);
+
+    const clicked = () => {
+        const { left, top } = noteRef.current?.getBoundingClientRect();
+        onClick?.(noteAndIndex.note, noteAndIndex.index, new Point(left, top));
+    }
 
     return (
         <div 
-            className={noteAndIndex?.note.main ? styles.mainNote : styles.stickyNote} 
-            style={{ left: point?.x, top: point?.y }}
-            onClick={() => onClick?.(noteAndIndex.note, noteAndIndex.index, point)}
+            className={(noteAndIndex?.note.main ? styles.mainNote : styles.stickyNote) + ' '
+                + (isConnection ? styles.connectionNote : '')} 
+            style={inlineStyle}
+            onClick={clicked}
+            id={noteAndIndex.note.id}
+            ref={(el) => {noteRef.current = el; ref?.(el)}}
         >
-            <div className={styles.noteTitle + (selected?.note.id === noteAndIndex.note.id ? ' ' + styles.selected : '')}>
+            <div className={styles.noteTitle + (isSelected ? ' ' + styles.selected : '')}>
                 {noteAndIndex?.note.title}
             </div>
-            <div className={styles.noteText}>{noteAndIndex?.note.text}</div>
+            <div className={`${styles.noteText} ${isConnection ? styles.connectionText : ''}`}>
+                {noteAndIndex?.note.text}
+            </div>
+            {/* {isConnection ? (
+                <img className={styles.tack} src={tackImg} />
+            ): null} */}
         </div>
     )
 }
 
-export default Note;
+export default forwardRef(Note);

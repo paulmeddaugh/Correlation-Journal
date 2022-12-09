@@ -1,2 +1,2 @@
 Loading border animation - https://web.dev/css-border-animations/
-Canvas in React - https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
+Storing an array of refs in React - https://mattclaffey.medium.com/adding-react-refs-to-an-array-of-items-96e9a12ab40c

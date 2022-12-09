@@ -61,8 +61,8 @@ img { /* Notebook icon */
 }
 
 #title {
+    font: 14pt Corbel;
     font-weight: bold;
-    font-size: 14pt;
     padding-left: 0;
     padding-bottom: 2px;
 }

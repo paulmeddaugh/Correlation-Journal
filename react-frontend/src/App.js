@@ -45,7 +45,11 @@ const App = () => {
 
     if (loading) {
         return (
-            <Loading />
+            <Loading 
+                status={loading.status} 
+                linkText={loading.linkText} 
+                onLinkClick={() => setLoading(false)}
+            />
         )
     }
 
@@ -54,7 +58,13 @@ const App = () => {
             {!user?.id ? (
                 <BrowserRouter>
                     <Routes>
-                        <Route path="*" element={<Login onValidUser={setUser} onLoading={() => setLoading(true)} />} />
+                        <Route path="*" element={
+                            <Login 
+                                onValidUser={setUser} 
+                                onLoadingUser={() => setLoading({ status: 'Loading...' })} 
+                                onLoginError={() => setLoading({ status: 'The backend is not running.', linkText: 'Retry' })} 
+                            />}
+                        />
                         <Route path="createAccount/*" element={<CreateAccount />} />
                         <Route path="forgotPassword/*" element={<ForgotPassword />} />
                     </Routes>
@@ -77,8 +87,8 @@ const App = () => {
                                     notebooksState={[notebooks, setNotebooks]}
                                     onMount={() => setNewNoteId(-1)}
                                 />
-                            </NoteBoxLayout>
-                        } />
+                            </NoteBoxLayout>} 
+                        />
                         <Route path="/" element={
                             <NoteBoxLayout 
                                 graphState={[graph, setGraph]} 

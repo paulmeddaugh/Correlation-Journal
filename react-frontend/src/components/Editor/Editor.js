@@ -21,6 +21,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 	const [initialGraphValues, setInitialGraphValues] = useState({ loadedSize: false, highestId: 0 });
 
 	const dataListRef = useRef(null);
+	const titleRef = useRef(null);
 
 	useEffect(() => { // Stores initial graph values for retrieving live connecting notes algorithm
 		// Skips component first mounting
@@ -51,8 +52,8 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 				note?.title ? note.title : '',
 				note?.text ? note.text : '',
 				note?.quotes ? note.quotes : '',
-				note?.idNotebook ? note.idNotebook : -1, // Stores the index, as the property is never used
-				note?.main ? note.main : null,
+				note?.idNotebook ? note.idNotebook : -1,
+				note?.main ? note.main : false,
 				note?.dateCreated ? note.dateCreated : null,
 			));
 			setNoteInEditorIndex(index);
@@ -67,6 +68,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 
 	useEffect(() => {
 		onMount();
+		titleRef.current.focus();
 	}, [onMount]);
 
 	const updateOnBackFront = (e) => {
@@ -386,7 +388,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 			</div>
 
 			<div className={styles.editorAndConnections}>
-				<div id={styles.editor} className={noteInEditor?.main === null ? styles.editorStickyColor : styles.editorMainColor}>
+				<div id={styles.editor} className={noteInEditor?.main === false ? styles.editorStickyColor : styles.editorMainColor}>
 					<input 
 						type="text" 
 						id={styles.title} 
@@ -395,6 +397,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 						value={noteInEditor.title}
 						onChange={(e) => setNoteInEditor({...noteInEditor, title: e.target.value})}
 						onFocus={(e) => {if (noteInEditor.title === 'Untitled') selectAllText(e)}}
+						ref={titleRef}
 					/>
 					<textarea 
 						id={styles.text} 

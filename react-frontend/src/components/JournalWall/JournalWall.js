@@ -5,20 +5,21 @@ import NoteWall from "./NoteWall";
 import BackgroundCanvas from "./BackgroundCanvas";
 import Graph from "../../scripts/graph/graph.js";
 import Point from '../../scripts/notes/point';
+import Line from "./Line";
 
 const MAIN_NOTE_SIZE = { width: 100, height: 100 };
 const STICKY_NOTE_SIZE = { width: 100, height: 100 };
 
-const NOTE_WALL_GAP = 475;
-const NOTE_WALL_X_START = 200;//'30%';
-const NOTE_WALL_Y_START = 200;//'40%';
+const NOTE_WALL_GAP = 485;
+const NOTE_WALL_X_START = 250;//'30%';
+const NOTE_WALL_Y_START = 285;//'40%';
 
 const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected] }) => {
 
     const [notes, setNotes] = useState([]);
     const [independentNotes, setIndependentNotes] = useState([]);
     const [scrollToMap, setScrollToMap] = useState(new Map());
-    const [wallzindex, setWallzindex] = useState(4);
+    const [connectionNoteWalls, setConnectionNoteWalls] = useState([]);
 
     const [drawArray, setDrawArray] = useState([]);
 
@@ -92,6 +93,13 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected] 
         setDrawArray(drawArray);
     }, [independentNotes]);
 
+    const onNoteWallMount = (hasConnectionCanvas, draw) => {
+        if (!hasConnectionCanvas && drawArray) {
+            drawArray.push(draw);
+            setDrawArray(drawArray);
+        }
+    };
+
     const onNoteMount = (note, index, point) => {
         if (!scrollToMap.has(note.id)) scrollToMap.set(note.id, point);
         setScrollToMap(new Map(scrollToMap));
@@ -105,6 +113,9 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected] 
         const width = journalWallRef.current.getBoundingClientRect().width;
         const halfNoteWidth = (note.main) ? MAIN_NOTE_SIZE.width / 2 : STICKY_NOTE_SIZE.width / 2;
         journalWallRef.current.scrollTo({ left: point.x - (width / 2) + halfNoteWidth, behavior: 'smooth' });
+
+        connectionNoteWalls.push({ note, index, point });
+        setConnectionNoteWalls(connectionNoteWalls.concat());
     };
 
     const getCenterPoint = (i) => {
@@ -119,22 +130,50 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected] 
         }) : null;
     }
 
+    const lineOrigin = (i) => {
+        const { x: left, y: top } = getCenterPoint(i);
+        return { left, top: top + 30 };
+    }
+
     return (
         <div className={styles.main} ref={journalWallRef}>
             {independentNotes?.map((noteAndIndex, i) => (
+                <>
+                    <Line 
+                        length={NOTE_WALL_GAP} 
+                        rotateOrigin={lineOrigin(i)} 
+                        color={'lightgrey'}
+                        animation={false}
+                        dashed={true}
+                        key={i}
+                    />
+                    <NoteWall 
+                        noteAndIndex={noteAndIndex}
+                        centerPoint={getCenterPoint(i)}
+                        connectingNotes={getConnectingNotes(noteAndIndex.index)}
+                        onNoteMount={onNoteMount}
+                        onNoteClick={onCenterNoteClick}
+                        onConnectionClick={onConnectionClick}
+                        onMount={onNoteWallMount}
+                        selected={selected}
+                        key={i}
+                    />
+                </>
+            ))}
+            {connectionNoteWalls.map(({ note, index, point }, i) => (
                 <NoteWall 
-                    noteAndIndex={noteAndIndex}
-                    centerPoint={getCenterPoint(i)}
-                    connectingNotes={getConnectingNotes(noteAndIndex.index)}
+                    noteAndIndex={{ note: note, index: index }}
+                    centerPoint={{ x: point.x, y: NOTE_WALL_Y_START }}
+                    connectingNotes={getConnectingNotes(index)}
                     onNoteMount={onNoteMount}
                     onNoteClick={onCenterNoteClick}
                     onConnectionClick={onConnectionClick}
-                    drawArrayState={[drawArray, setDrawArray]}
+                    onMount={onNoteWallMount}
+                    connectionWall={true}
                     selected={selected}
                     key={i}
                 />
             ))}
-            <BackgroundCanvas drawArray={drawArray} resizeRef={journalWallRef}></BackgroundCanvas>
         </div>
     )
 }

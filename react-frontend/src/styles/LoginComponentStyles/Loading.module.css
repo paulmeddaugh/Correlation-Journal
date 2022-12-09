@@ -58,6 +58,17 @@
     transition: 1s;
 }
 
+.link {
+    position: absolute;
+    margin-top: 50px;
+    color: #00BFFF;
+    transition: 1s;
+}
+
+.link:hover {
+    cursor: pointer;
+}
+
 *, *::before, *::after {
 	box-sizing: border-box;
 }

@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../../styles/LoginComponentStyles/Login.module.css'; // Import css modules stylesheet as styles
 
-const Login = ({ onValidUser, onLoading }) => {
+const Login = ({ onValidUser, onLoadingUser, onLoginError }) => {
 
     const [username, setUsername] = useState('AtLongLast');
     const [password, setPassword] = useState('Thoughts');
@@ -29,14 +29,14 @@ const Login = ({ onValidUser, onLoading }) => {
             focusRef.current.focus();
             e.preventDefault();
         } else {
-            onLoading();
+            onLoadingUser();
 
             axios.get(`/api/users?username=${username}&password=${password}`).then(response => {
                 console.log(response.data._embedded.userList[0]);
                 onValidUser(response.data._embedded.userList[0]);
             }).catch((error) => {
                 if (String(error.response.data).startsWith('Proxy error')) {
-                    alert('The backend is not running.');
+                    onLoginError();
                 } else {
                     alert(error.response.data);
                 }
