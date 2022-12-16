@@ -18,7 +18,7 @@
 
 .connectionLabel {
     font-size: 12pt;
-    color: rgb(152, 152, 152);
+    color: white;
     flex: 1;
     position: absolute;
     right: 3%;
@@ -42,4 +42,15 @@
 .connectionNoteWall {
     background-color: lightskyblue;
     border: 1px solid;
+    z-index: 5;
+}
+
+.closeButton {
+    position: absolute;
+    top: 8%;
+    right: 8%;
+    font-size: 16pt;
+    font-family: monospace;
+    color: black;
+    cursor: pointer;
 }

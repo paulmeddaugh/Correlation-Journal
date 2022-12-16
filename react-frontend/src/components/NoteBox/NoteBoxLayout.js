@@ -3,7 +3,7 @@ import siteStyles from '../../styles/App.module.css';
 import NoteBox from "./NoteBox";
 import CustomConfirm from "../CustomConfirm";
 
-const NoteBoxLayout = ({ graphState, notebooksState, children, selectedState, headerRef }) => {
+const NoteBoxLayout = ({ graphState, notebooksState, children, selectedState, headerRef, onNotebookSelect }) => {
 
     // A state for an object that holds 'title', 'message', and 'callback' properties,
     // displaying a model what invokes the callback with the confirm results when set
@@ -35,6 +35,7 @@ const NoteBoxLayout = ({ graphState, notebooksState, children, selectedState, he
                     graphState={graphState} 
                     notebooksState={notebooksState} 
                     selectedState={selectedState} 
+                    onNotebookSelect={onNotebookSelect}
                 />
                 <div id={siteStyles.content}>
                     {children}

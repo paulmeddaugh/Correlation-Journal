@@ -128,27 +128,29 @@
         // adding by relative index
         } else { 
             if (u < 0 || u >= this.neighbors.size) {
-                console.log("couldn't add 'u' " + u + ": index out of bounds");
+                console.log("Couldn't add first edge index '" + u + "': index out of bounds.");
                 return -1;
             }
             if (v < 0 || v >= this.neighbors.size) {
-                console.log("couldn't add 'v' " + v + ": index out of bounds");
+                console.log("Couldn't add second edge index '" + v + "': index out of bounds.");
                 return -1;
             }
 
             let v1 = this.vertexAt(u);
             let v2 = this.vertexAt(v);
 
-            binaryAddEdgeById(this.neighbors.get(v1.id), v2, weight);
+            let wasAdded = binaryAddEdgeById(this.neighbors.get(v1?.id), v2, weight);
             if (this.multidirectional) {
-                binaryAddEdgeById(this.neighbors.get(v2.id), v1, weight);
+                wasAdded = (binaryAddEdgeById(this.neighbors.get(v2?.id), v1, weight)) ? wasAdded : false;
             }
 
-            return true;
+            return wasAdded;
         }
 
         // Binary insert edge to a vertex's neighboring array: O(n)
         function binaryAddEdgeById (neighborsArr, v, weight) {
+
+            if (!Array.isArray(neighborsArr)) return false;
             
             let high = neighborsArr.length - 1, low = 0, mid = 0|(high / 2);
             while (high >= low) {
@@ -162,6 +164,7 @@
             }
 
             neighborsArr.splice(Math.max(low, high), 0, {v: { id: v.id }, weight: weight });
+            return true;
         }
 
         return false;
@@ -287,17 +290,16 @@
 
     /**
      * Returns a vertex by its index as a Number, or its 'id' property as a String, if existing. Returns 
-     * false otherwise.
+     * null otherwise.
      * 
      * @param {*} v The index of the vertex as a Number, or the 'id' of the vertex as a String.
-     * @returns The vertex if existing. Otherwise, returns false.
+     * @returns The vertex if existing. Otherwise, returns null.
      */
     getVertex(v) {
+        if (typeof v == 'number') return this.verticies[v] ?? null;
+        else if (typeof v == 'string') return this.verticies.find(vertex => v == vertex.id) ?? null;
 
-        if (typeof v == 'number') return this.verticies[v];
-        else if (typeof v == 'string') return this.verticies.find(vertex => v == vertex.id);
-
-        return false;
+        return null;
     }
 
     /**
@@ -318,7 +320,7 @@
      */
     getVertexNeighbors(v) {
         if (typeof v == 'number') return this.neighbors.get(this.getVertex(v)?.id)?.concat();
-        else if (typeof v == 'string') return this.neighbors.get(v?.id)?.concat();
+        else if (typeof v == 'string') return this.neighbors.get(Number(v))?.concat();
         else if (v?.hasOwnProperty('id')) return this.neighbors.get(v?.id)?.concat();
 
         return null;

@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import styles from '../../styles/JournalWall/NoteWall.module.css';
 import BigNote from './BigNote';
 import Note from "./Note";
 import Line from "./Line";
-import Canvas from "./Canvas";
 import { binarySearch } from "../../scripts/utility/utility";
 
 const CONNECTIONS_DISTANCE = 175;
@@ -12,77 +11,64 @@ const NOTE_CENTER_MAIN_X = 100 / 2;
 const NOTE_CENTER_MAIN_Y = 125 / 2;
 const NOTE_CENTER_STICKY_X = 100 / 2;
 const NOTE_CENTER_STICKY_Y = 100 / 2;
-const BIG_NOTE_HOVER_X = 175;
-const BIG_NOTE_HOVER_Y = 219;
+const BIG_NOTE_MAIN_HOVER_WIDTH = 175;
+const BIG_NOTE_STICKY_HOVER_WIDTH = 175;
+const BIG_NOTE_MAIN_HOVER_HEIGHT = 219;
+const BIG_NOTE_STICKY_HOVER_HEIGHT = 175;
 
-const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, hasConnectionCanvas, onMount,
-    onConnectionClick, onNoteClick, onNoteMount, selected, connectionWall }) => {
+const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendBoundaryBy,
+    onConnectionClick, onNoteClick, onNoteMount, selected, isConnectionWall, isCloseable, onClose }) => {
 
     const [bigNoteAnimation, setBigNoteAnimation] = useState(0);
     const noteWallRef = useRef(null);
     const bigNoteRef = useRef(null);
     const noteRefs = useRef([]);
-
-    const draw = (ctx, frameCount) => {
-
-        if (hasConnectionCanvas) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-        const noteMidX = (noteAndIndex.note.main) ? NOTE_CENTER_MAIN_X : NOTE_CENTER_STICKY_X;
-        const noteMidY = (noteAndIndex.note.main) ? NOTE_CENTER_MAIN_Y : NOTE_CENTER_STICKY_Y;
-
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        for (let i = 0; i < connectingNotes?.length; i++) {
-            ctx.moveTo(centerPoint.x + noteMidX, centerPoint.y + noteMidY);
-            const connectingPoint = connectingNoteInlineStyle(i);
-            const midX = (connectingNotes[i].note.main) ? NOTE_CENTER_MAIN_X : NOTE_CENTER_STICKY_X;
-            const midY = (connectingNotes[i].note.main) ? NOTE_CENTER_MAIN_Y : NOTE_CENTER_STICKY_Y;
-            ctx.lineTo(connectingPoint.x + midX, connectingPoint.y + midY);
-        }
-        ctx.stroke();
-        ctx.closePath();
-    };
+    const [connectionWall, setConnectionWall] = useState(null);
 
     useEffect(() => {
-        onMount(hasConnectionCanvas, draw);
+        onMount?.();
+        noteWallRef.current.focus();
     }, []);
 
     const boundaryInline = () => ({
-        width: BIG_NOTE_HOVER_X + CONNECTIONS_DISTANCE,
-        height: BIG_NOTE_HOVER_Y + CONNECTIONS_DISTANCE,
+        width: BIG_NOTE_MAIN_HOVER_WIDTH + CONNECTIONS_DISTANCE + (extendBoundaryBy ?? 0),
+        height: BIG_NOTE_MAIN_HOVER_HEIGHT + CONNECTIONS_DISTANCE + (extendBoundaryBy ?? 0),
         left: centerPoint.x,
         top: centerPoint.y
     });
 
     const bigNoteInlineStyle = () => {
         return (!bigNoteAnimation) ? {} : {
-            width: BIG_NOTE_HOVER_X,
-            height: BIG_NOTE_HOVER_Y,
+            width: noteAndIndex?.note.main ? BIG_NOTE_MAIN_HOVER_WIDTH : BIG_NOTE_STICKY_HOVER_WIDTH,
+            height: noteAndIndex?.note.main ? BIG_NOTE_MAIN_HOVER_HEIGHT : BIG_NOTE_STICKY_HOVER_HEIGHT,
             border: '1px solid',
-            backgroundColor: 'rgba(240, 238, 239, .95)',
+            opacity: .95,
         };
     }
 
     const connectingNoteInlineStyle = (i) => {
 
+        // First appearance (val = 0): JS to randomly rotate each note slightly left or right 
         if (!bigNoteAnimation) {
             return {
                 rotate: (Math.floor(Math.random() * 2) ? '' : '-') + '1deg',
             };
         }
 
-        if (bigNoteAnimation === 1 && noteRefs.current.length) { // Returns the last position of the note when attached to BigNote
+        // Hover over beginning position (val = 1): 
+        if (bigNoteAnimation === 1 && noteRefs.current.length) {
+            // Places replacing Note components at the same Note's last position in first appearance
             if (noteRefs.current[i].style?.top === '') {
                 if (noteRefs.current[i].id) {
                     const { left: noteLeft, top: noteTop } = noteRefs.current[i].getBoundingClientRect();
-                    const { left: parentLeft, top: parentTop } = noteWallRef.current.getBoundingClientRect();
-                    noteRefs.current[i] = {
+                    const { left: parentLeft } = noteWallRef.current.getBoundingClientRect();
+                    noteRefs.current[i] = { // Replaces ref with its last position styling
                         left: noteLeft - parentLeft + NOTE_CENTER_MAIN_X, 
                         top: noteTop - NOTE_CENTER_MAIN_Y,
                     };
                 }
 
+                // Triggers ending position styling (animated with css transition)
                 setTimeout(() => {
                     if (bigNoteAnimation === 1) setBigNoteAnimation(2);
                     noteRefs.current = [];
@@ -90,6 +76,8 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, hasConnectionCan
             }
 
             return noteRefs.current[i];
+
+        // Hover over ending position (val = 2)
         } else {
             const angle = getLineAngle(i);
             const noteWallCenter = getNoteWallCenter();
@@ -111,11 +99,69 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, hasConnectionCan
         }
     }
 
+    const onConnectionClicked = (n, i, p) => {
+        const wall = onConnectionClick(n, i, p, noteAndIndex.note, () => setConnectionWall(null)); 
+        if (wall) setConnectionWall(wall);
+    }
+
+    const onBlur = () => {
+        setConnectionWall(null);
+    }
+
     if (bigNoteAnimation) {
         return (
+            <>
+                <div 
+                    className={`${styles.noteWallBoundary} ${(isConnectionWall) ? styles.connectionNoteWall : ''}`} 
+                    style={boundaryInline()} 
+                    onBlur={onBlur}
+                    tabIndex={centerPoint.x + noteAndIndex.note.id}
+                    onMouseLeave={() => setBigNoteAnimation(0)}
+                    ref={noteWallRef}
+                >
+                    <BigNote 
+                        noteAndIndex={noteAndIndex} 
+                        inlineStyle={bigNoteInlineStyle()} 
+                        onClick={onNoteClick}
+                        onMount={onNoteMount}
+                        onMouseEnter={() => setBigNoteAnimation(1)}
+                        onMouseLeave={connectingNotes?.length === 0 ? () => setBigNoteAnimation(0) : null}
+                        isSelected={selected?.note.id === noteAndIndex.note.id}
+                        noConnections={connectingNotes?.length === 0}
+                        ref={bigNoteRef}
+                    />
+                    {connectingNotes.map((noteAndIndex, i) => (
+                        <Fragment key={100 + i}>
+                            <Note 
+                                noteAndIndex={noteAndIndex}
+                                inlineStyle={connectingNoteInlineStyle(i)}
+                                onClick={onConnectionClicked}
+                                onMount={onNoteMount}
+                                isSelected={selected?.note.id === noteAndIndex.note.id}
+                                isConnection={false}
+                            />
+                            <Line 
+                                angle={getLineAngle(i)} 
+                                length={CONNECTIONS_DISTANCE}
+                                color={'lightgrey'}
+                                rotateOrigin={getNoteWallCenter()}
+                                animation={false}
+                            />
+                        </Fragment>
+                    ))}
+                    {isCloseable && <div className={styles.closeButton} onClick={onClose}>X</div>}
+                </div>
+
+                {!!connectionWall && connectionWall}
+            </>
+        )
+    }
+
+    return (
+        <>
             <div 
-            className={`${styles.noteWallBoundary} ${(connectionWall) ? styles.connectionNoteWall : ''}`} 
-                style={boundaryInline()} 
+                className={`${styles.noteWallBoundary} ${(isConnectionWall) ? styles.connectionNoteWall : ''}`} 
+                style={boundaryInline()}
                 ref={noteWallRef}
                 onMouseLeave={() => setBigNoteAnimation(0)}
             >
@@ -126,99 +172,60 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, hasConnectionCan
                     onMount={onNoteMount}
                     onMouseEnter={() => setBigNoteAnimation(1)}
                     isSelected={selected?.note.id === noteAndIndex.note.id}
-                    noConnections={connectingNotes.length === 0}
+                    noConnections={connectingNotes?.length === 0}
                     ref={bigNoteRef}
-                />
-                {connectingNotes.map((noteAndIndex, i) => (
-                    <>
-                        <Note 
-                            noteAndIndex={noteAndIndex}
-                            inlineStyle={connectingNoteInlineStyle(i)}
-                            onClick={onConnectionClick}
-                            onMount={onNoteMount}
-                            isSelected={selected?.note.id === noteAndIndex.note.id}
-                            isConnection={false}
-                            key={i} 
-                        />
-                        <Line 
-                            angle={getLineAngle(i)} 
-                            length={CONNECTIONS_DISTANCE}
-                            rotateOrigin={getNoteWallCenter()}
-                        />
-                    </>
-                ))}
+                >
+                    {connectingNotes.length >= 1 ? (
+                        <div className={styles.bigNoteTop} id='bigNoteTop'>
+                            {connectingNotes.slice(0, Math.ceil(connectingNotes.length / 2)).map((noteAndIndex, i) => (
+                                <Note 
+                                    noteAndIndex={noteAndIndex}
+                                    inlineStyle={connectingNoteInlineStyle(i)}
+                                    onClick={onConnectionClicked}
+                                    onMount={onNoteMount}
+                                    isSelected={selected?.note.id === noteAndIndex.note.id}
+                                    isConnection={true}
+                                    ref={(el) => {
+                                        if (el && !binarySearch(noteRefs.current, el.id)[0]) 
+                                        noteRefs.current.push(el)
+                                    }}
+                                    key={200 + i} 
+                                />
+                            ))}
+                            <div className={styles.connectionLabel}>
+                                ---------------- Connections
+                            </div>
+                        </div>
+                    ) : null}
+                    {connectingNotes.length === 0 ? (
+                        null
+                    ) : connectingNotes.length === 1 ? (
+                        null
+                    ) : connectingNotes.length >= 2 ? (
+                        <div className={styles.bigNoteBottom} id='bigNoteBottom'>
+                            {connectingNotes.slice(Math.ceil(connectingNotes.length / 2)).map((noteAndIndex, i) => (
+                                <Note 
+                                    noteAndIndex={noteAndIndex}
+                                    inlineStyle={connectingNoteInlineStyle(i + connectingNotes.length / 2)}
+                                    onClick={onConnectionClicked}
+                                    onMount={onNoteMount}
+                                    isSelected={selected?.note.id === noteAndIndex.note.id}
+                                    isConnection={true}
+                                    ref={(el) => {if (el && !binarySearch(noteRefs, el.id)[0]) noteRefs.current.push(el)}}
+                                    key={300 + i} 
+                                />
+                            ))}
+                            <div className={`${styles.connectionLabel} ${styles.connectionLabelBottom}`}>
+                                ---------------- Connections
+                            </div>
+                        </div>
+                    ) : null}
+                </BigNote>
+                {isCloseable && <div className={styles.closeButton} onClick={onClose}>X</div>}
             </div>
-        )
-    }
 
-    return (
-        <div 
-            className={`${styles.noteWallBoundary} ${(connectionWall) ? styles.connectionNoteWall : ''}`} 
-            style={boundaryInline()} 
-            ref={noteWallRef}
-            onMouseLeave={() => setBigNoteAnimation(0)}
-        >
-            <BigNote 
-                noteAndIndex={noteAndIndex} 
-                inlineStyle={bigNoteInlineStyle()} 
-                onClick={onNoteClick}
-                onMount={onNoteMount}
-                onMouseEnter={() => setBigNoteAnimation(1)}
-                isSelected={selected?.note.id === noteAndIndex.note.id}
-                noConnections={connectingNotes.length === 0}
-                ref={bigNoteRef}
-            >
-                {connectingNotes.length >= 1 ? (
-                    <div className={styles.bigNoteTop} id='bigNoteTop'>
-                        {connectingNotes.slice(0, Math.ceil(connectingNotes.length / 2)).map((noteAndIndex, i) => (
-                            <Note 
-                                noteAndIndex={noteAndIndex}
-                                inlineStyle={connectingNoteInlineStyle(i)}
-                                onClick={onConnectionClick}
-                                onMount={onNoteMount}
-                                isSelected={selected?.note.id === noteAndIndex.note.id}
-                                isConnection={true}
-                                ref={(el) => {
-                                    if (el && !binarySearch(noteRefs.current, el.id)[0]) 
-                                    noteRefs.current.push(el)
-                                }}
-                                key={i} 
-                            />
-                        ))}
-                        <div className={styles.connectionLabel}>
-                            ---------------- Connections
-                        </div>
-                    </div>
-                ) : null}
-                {connectingNotes.length === 0 ? (
-                    null
-                ) : connectingNotes.length === 1 ? (
-                    null
-                ) : connectingNotes.length >= 2 ? (
-                    <div className={styles.bigNoteBottom} id='bigNoteBottom'>
-                        {connectingNotes.slice(Math.ceil(connectingNotes.length / 2)).map((noteAndIndex, i) => (
-                            <Note 
-                                noteAndIndex={noteAndIndex}
-                                inlineStyle={connectingNoteInlineStyle(i + connectingNotes.length / 2)}
-                                onClick={onConnectionClick}
-                                onMount={onNoteMount}
-                                isSelected={selected?.note.id === noteAndIndex.note.id}
-                                isConnection={true}
-                                ref={(el) => {if (el && !binarySearch(noteRefs, el.id)[0]) noteRefs.current.push(el)}}
-                                key={i} 
-                            />
-                        ))}
-                        <div className={`${styles.connectionLabel} ${styles.connectionLabelBottom}`}>
-                            ---------------- Connections
-                        </div>
-                    </div>
-                ) : null}
-            </BigNote>
-            
-            {hasConnectionCanvas ? (
-                <Canvas draw={draw} />
-            ) : null}
-        </div>
+            {!!connectionWall && connectionWall}
+        </>
     )
 }
 

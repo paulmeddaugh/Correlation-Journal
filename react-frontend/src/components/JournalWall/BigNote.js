@@ -18,7 +18,7 @@ const BigNote = ({ noteAndIndex, inlineStyle, onClick, onMount, isSelected, onMo
 
     return (
         <div 
-            className={(noteAndIndex?.note.main ? bigStyles.mainNote : styles.stickyNote)
+            className={(noteAndIndex?.note.main ? bigStyles.mainNote : bigStyles.stickyNote)
                 + ' ' + (noConnections ? bigStyles.noConnections : '')}
             style={inlineStyle}
             onClick={clicked}

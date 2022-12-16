@@ -38,7 +38,7 @@ const CreateAccount = () => {
     };
 
     const checkInput = (e) => {
-        const error = checkInvalidMap[e.target.name](e.target.value);
+        const error = (e.target.value !== '') ? checkInvalidMap[e.target.name](e.target.value) : null;
         if (error !== null) {
             setInvalidStateMap[e.target.name](true);
         } else {

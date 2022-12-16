@@ -22,11 +22,11 @@ const Note = ({ noteAndIndex, onClick, onMount, isSelected, inlineStyle, isConne
 
     return (
         <div 
+            id={noteAndIndex.note.id}
             className={(noteAndIndex?.note.main ? styles.mainNote : styles.stickyNote) + ' '
                 + (isConnection ? styles.connectionNote : '')} 
             style={inlineStyle}
             onClick={clicked}
-            id={noteAndIndex.note.id}
             ref={(el) => {noteRef.current = el; ref?.(el)}}
         >
             <div className={styles.noteTitle + (isSelected ? ' ' + styles.selected : '')}>
@@ -35,6 +35,9 @@ const Note = ({ noteAndIndex, onClick, onMount, isSelected, inlineStyle, isConne
             <div className={`${styles.noteText} ${isConnection ? styles.connectionText : ''}`}>
                 {noteAndIndex?.note.text}
             </div>
+            {!isConnection && <div className={styles.connectionWallInfo}>
+                Click to show connections
+            </div>}
             {/* {isConnection ? (
                 <img className={styles.tack} src={tackImg} />
             ): null} */}

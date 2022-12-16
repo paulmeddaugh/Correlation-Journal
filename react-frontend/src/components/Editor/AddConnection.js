@@ -25,26 +25,27 @@ const AddConnection = ({ currentNoteId, noteList, onAddConnection }) => {
     }
 
     return (
-        <div className={styles['flex-center'] + ' ' + styles.plusNoteContainer}>
+        <div className={styles.flex}>
+            <div className={styles.line} />
             <div className={styles.noteContainer + ' ' + styles['flex-center']} onMouseDown={showSelect}>
                 <div className={!addClicked ? styles.plusContainer : styles['display-none']}>
                     <div className={styles.plus}>+</div>
                 </div>
+                <select 
+                    className={!addClicked ? styles['display-none'] : styles.select} 
+                    onBlur={hideSelect}
+                    onChange={notePicked}
+                    defaultValue={'Select Note'}
+                    ref={selectRef}
+                >
+                    <option value={'Select Note'}>Select Note</option>
+                    {noteList.map((note, i) => (note.id >= 0 && note.id !== currentNoteId) ? (
+                        <option value={note.title} data-id={note.id} key={i}>
+                            {note.title}
+                        </option>
+                    ) : null)}
+                </select>
             </div>
-            <select 
-                className={!addClicked ? styles['display-none'] : styles.select} 
-                onBlur={hideSelect}
-                onChange={notePicked}
-                defaultValue={'Select Note'}
-                ref={selectRef}
-            >
-                <option value={'Select Note'}>Select Note</option>
-                {noteList.map((note, i) => (note.id >= 0 && note.id !== currentNoteId) ? (
-                    <option value={note.title} data-id={note.id} key={i}>
-                        {note.title}
-                    </option>
-                ) : null)}
-            </select>
         </div>
     );
 }

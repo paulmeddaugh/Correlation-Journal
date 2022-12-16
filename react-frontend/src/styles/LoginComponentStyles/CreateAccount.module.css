@@ -48,6 +48,15 @@ div.inputRow {
     color: red;
 }
 
+.inputContainer {
+    display: inline;
+}
+
+.redBorder {
+    padding: 4px 0px;
+    box-shadow: 0 1px 10px 4px red;
+}
+
 .textInputRed {
     border: 1.5px solid red;
 }

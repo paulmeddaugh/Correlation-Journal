@@ -2,12 +2,9 @@
     position: absolute;
     width: 300px;
     height: calc(35%);
-    /* translate: -50% -50%; */
     background-color: #f0eeef; /* rgb(255, 242, 171), #f5dec3 */
     border-left: 1px solid black;
     border-right: 1px solid black;
-    /* border-top: 1px solid #f0eeef;
-    border-bottom: 1px solid #f0eeef; */
     border: 1px solid;
     padding: 3px;
     transition: .5s ease;
@@ -31,6 +28,28 @@
     opacity: 1;
 }
 
+.stickyNote {
+    border: 1px solid black;
+    background-color: rgb(255, 247, 209, .95); /* rgb(255, 242, 171) */
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    padding: 3px;
+    transition: .5s ease;
+    translate: 0 0;
+    overflow: hidden;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.stickyNote:hover {
+    width: 175px;
+    height: 175px;
+    z-index: 4;
+}
+
 .titleAndDateContainer {
     display: flex;
     align-items: center;
@@ -39,6 +58,7 @@
 
 .noteTitle {
     font-style: italic;
+    text-align: unset;
 }
 
 .noteText {
@@ -46,8 +66,8 @@
     font-size: 11pt;
     /* opacity: 0; */
     transition: .5s ease;
-    /* max-height: 300px; */
     overflow: auto;
+    /* max-height: 300px; */
 }
 
 .noteDate {
@@ -55,6 +75,10 @@
     top: 1%;
     right: 3%;
     color: #4c4c4c;
+}
+
+.mainNote:hover .noteText, .stickyNote:hover .noteText {
+    overflow-y: auto;
 }
 
 .line {

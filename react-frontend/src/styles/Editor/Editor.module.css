@@ -39,7 +39,7 @@ img { /* Notebook icon */
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 14px;
+    padding: 15px;
     border: 1px solid;
     transition: 1s ease;
     flex: 1; /* Fills space between connections and editor */
@@ -63,13 +63,14 @@ img { /* Notebook icon */
 #title {
     font: 14pt Corbel;
     font-weight: bold;
-    padding-left: 0;
-    padding-bottom: 2px;
+    padding-left: 2px;
+    padding-bottom: 0;
 }
 
 #text {
     flex: 2;
     font-size: 11pt;
+    resize: none;
 }
 
 #quotes {

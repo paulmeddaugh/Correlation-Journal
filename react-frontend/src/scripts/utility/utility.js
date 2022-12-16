@@ -33,17 +33,25 @@ export function stringFromSQL (string) {
  * @returns An array containing the object with the 'id' value as first index and the index for 
  * the object in the array as second if found. Otherwise, returns an empty array.
  */
-export function binarySearch(arr, id, skipTo = 0) {
+export function binarySearch(arr, id, skipTo = 0, arrPropPath = 'id') {
 
+    const arrPath = arrPropPath.split('.');
     let low = skipTo, high = arr.length - 1;
     let mid = 0|(low + (high - low) / 2);
     let found = false;
 
     while (high >= low) {
-        if (id > arr[mid].id) { // Greater than mid
+
+        // Gets comparing arr value from arr using arrPropPath
+        let arrVal, i;
+        for (arrVal = arr, i = -1; i < arrPath.length; i++) {
+            arrVal = (i === -1) ? arrVal[mid] : arrVal[arrPath[i]];
+        }
+
+        if (id > arrVal) { // Greater than mid
             low = mid + 1;
             mid = 0|(low + (high - low) / 2);
-        } else if (id < arr[mid].id) { // Less than mid
+        } else if (id < arrVal) { // Less than mid
             high = mid - 1;
             mid = 0|(low + (high - low) / 2);
         } else { // Found

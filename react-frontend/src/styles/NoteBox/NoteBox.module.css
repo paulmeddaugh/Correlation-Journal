@@ -1,6 +1,6 @@
 #infobox {
     border-right: 1px solid grey;
-    background: grey;
+    background: lightgray;
     opacity: .8;
     width: 300px;
     height: 100%;
@@ -22,7 +22,13 @@
     background: lightgrey;
 }
 
+#searchLabel {
+    margin-left: -1px;
+}
+
 #searchInput {
+    margin-top: 2px;
+    margin-left: 1px;
     font-size: 9pt;
     width: 100%;
 }
@@ -47,7 +53,18 @@
 }
 
 #unpin:hover img {
-    content:url("../../resources/unpinIconHover2.png");
+    content: url("../../resources/unpinIconHover2.png");
+}
+
+#filter {
+    padding: 2px;
+    margin-left: 4px;
+    margin-right: -4px;
+    display: inherit;
+}
+
+#filter:hover img {
+    content: url("../../resources/filterIconHover.png");
 }
 
 img {

@@ -7,8 +7,9 @@
     position: absolute;
     padding: 3px;
     transition: .5s ease;
-    overflow: hidden;
     z-index: 3;
+    display: flex;
+    flex-direction: column;
 }
 
 .mainNote:hover {
@@ -32,18 +33,19 @@
     background-color: rgb(255, 247, 209, .95); /* rgb(255, 242, 171) */
     width: 100px;
     height: 100px;
-    translate: -50% -50%;
     position: absolute;
+    translate: -50% -50%;
     padding: 3px;
     transition: .5s ease;
     overflow: hidden;
     z-index: 3;
+    display: flex;
+    flex-direction: column;
 }
 
 .stickyNote:hover {
     width: 175px;
     height: 175px;
-    /* transform: translate(calc((175px - 100px) / -2), calc((175px - 100px) / -2)); */
     z-index: 4;
 }
 
@@ -59,10 +61,11 @@
 }
 
 .noteText {
-    text-overflow: ellipsis;
     font-size: 11pt;
     transition: .5s ease;
     animation: fadeIn .75s;
+    overflow-y: overlay;
+    flex: 1;
 }
 
 .selected {
@@ -106,7 +109,7 @@
 @keyframes fadeIn {
     0% { opacity: 0; }
     100% { opacity: 1; }
-  }
+}
 
 /* .connectionLabel {
     position: absolute;
@@ -121,5 +124,24 @@
 } */
 
 .connectionText:hover {
+    opacity: 1;
+}
+
+.connectionWallInfo {
+    position: absolute;
+    top: 0%;
+    left: 100%;
+    translate: 0% -50%;
+    padding-bottom: 1px;
+    transform-origin: bottom left;
+    transform: rotate(90deg);
+    color: white;
+    width: 100%;
+    white-space: nowrap;
+    opacity: 0;
+    transition: .75s ease;
+}
+
+.mainNote:hover .connectionWallInfo, .stickyNote:hover .connectionWallInfo {
     opacity: 1;
 }

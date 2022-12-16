@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from '../../styles/NoteBox/NoteBox.module.css';
 import NoteBoxNote from './NoteBoxNote';
 import CustomSelect from './CustomSelect';
@@ -7,9 +7,10 @@ import axios from 'axios';
 
 const pinSrc = require("../../resources/unpinIcon.jpg");
 const unpinSrc = require("../../resources/unpinIcon2.png");
+const filterIcon = require("../../resources/filterIcon.png");
 
 const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, setNotebooks], 
-    selectedState: [selected, setSelected] }) => {
+    selectedState: [selected, setSelected], onNotebookSelect }) => {
 
     const [areSearchResults, setSearchResults] = useState(true);
     const [customSelectValues, setCustomSelectValue] = useState({
@@ -23,6 +24,10 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
     const noNotes = useRef(null);
 
     const pinIcon = useRef(null);
+
+    useEffect(() => {
+        setSearchResults(graph.getVertices()?.length === 0 ? false : true);
+    }, [graph]);
 
     const unpin = () => {
         infobox.current.style.width = '0px';
@@ -74,6 +79,14 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
 
         // Delete on frontend: O(1)
         graph.removeVertex(index);
+        setGraph(graph.clone());
+
+        // Resets selected note if deleted
+        if (note.id === selected.note.id) {
+			const i = (selected.index - 1 >= 0) ? selected.index - 1 : -1;
+            const n = graph.getVertex(i);
+			setSelected({ note: n, index: i });
+		}
     }
 
     const onSelectNotebook = (innerHTML, value, id) => {
@@ -89,6 +102,8 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
 
         noNotes.current.style.display = (!anyNotes) ? 'block' : 'none';
         setCustomSelectValue({ innerHTML: innerHTML, 'data-id': id });
+
+        onNotebookSelect?.({ name: innerHTML, id });
     }
 
     // Handler for the onRemove prop of the customized select for notebooks
@@ -101,7 +116,7 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
         });
 
         // Deletes notebook: O(log n) time
-        const id = notebook.id, [ , index] = binarySearch(notebooks, id, 1);
+        const id = notebook.id, [, index] = binarySearch(notebooks, id, 1);
         notebooks.splice(index, 1);
         setNotebooks(notebooks);
 
@@ -118,12 +133,12 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
         <div id={styles.leftBox}>
             <div id={styles.infobox} ref={infobox}>
                 <div id={styles.searchBar} className={styles.configs}>
-                    <label htmlFor="searchInput">Search:&nbsp;</label>
+                    <label id={styles.searchLabel} htmlFor="searchInput">Search:&nbsp;</label>
                     <input 
                         type="text" 
                         list='noteOptions'
                         id={styles.searchInput} 
-                        placeholder="By title, body"
+                        placeholder="by title, text"
                         onChange={searchInputChange}
                         ref={searchInput}
                     />
@@ -134,6 +149,9 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
                             </option>
                         ))}
                     </datalist>
+                    {/* <div id={styles.filter}>
+                        <img src={filterIcon} alt="filter" />
+                    </div> */}
                     <div id={styles.unpin} onClick={unpin}>
                         <img src={unpinSrc} alt="unpin" />
                     </div>

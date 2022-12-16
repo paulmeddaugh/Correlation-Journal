@@ -21,7 +21,7 @@ const NoteBoxNote = ({ note, index, onSelect, onDelete, selected }) => {
             href={'#' + note.id}
             className={"list-group-item list-group-item-action flex-column align-items-start " 
                 + ((selected.note.id === note.id) ? "active " : ' ') // Is selected styling
-                + (String(note.title).slice(-1) === '﻿' ? styles.unsavedNote : '')} // Unsaved note styling
+                + (String(note.title)[0] === '﻿' ? styles.unsavedNote : '')} // Unsaved note styling
             data-idnotebook={note.idNotebook}
         >
             <div className="d-flex w-30 justify-content-between">
@@ -34,7 +34,7 @@ const NoteBoxNote = ({ note, index, onSelect, onDelete, selected }) => {
             <div className='d-flex justify-content-between'>
                 <p className="mb-1">{note.text !== '' ? note.text : '-'}</p>
                 <small className={styles.unsavedNoteText}>
-                    {String(note.title).slice(-1) === '﻿' ? 'Unsaved' : ''}
+                    {String(note.title)[0] === '﻿' ? 'Unsaved' : ''}
                 </small>
             </div>
             
