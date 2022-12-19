@@ -8,8 +8,11 @@ html, body {
 }
 
 .form {
-    padding: 25px;
+    padding: clamp(10px, 4vh, 35px);
     height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .flexRow {
@@ -23,10 +26,15 @@ img { /* Notebook icon */
     height: 24px;
 }
 
+#notebookIcon {
+    max-width: 22px;
+    max-height: 22px;
+    margin-left: 3px;
+}
+
 #notebook {
     width: 100%;
-    margin-bottom: 5px;
-    margin-left: 10px;
+    margin-left: 8px;
 }
 
 .editorAndConnections {
@@ -89,7 +97,7 @@ img { /* Notebook icon */
     overflow-y: auto;
     overflow-x: hidden;
     flex: .35;
-    max-width: 225px;
+    max-width: 250px;
 }
 
 .canvasContainer {
@@ -121,4 +129,11 @@ input[type=radio] {
 
 #stickyButton:hover {
     background-color: rgb(253, 243, 192);
+}
+
+#addUpdate {
+    position: relative;
+    margin-top: 20px;
+    bottom: 0%;
+    width: 100px;
 }

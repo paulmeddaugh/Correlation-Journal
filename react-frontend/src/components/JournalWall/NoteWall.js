@@ -143,9 +143,10 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendB
                             <Line 
                                 angle={getLineAngle(i)} 
                                 length={CONNECTIONS_DISTANCE}
-                                color={'lightgrey'}
+                                color={'white'}
                                 rotateOrigin={getNoteWallCenter()}
                                 animation={false}
+                                fadeIn={true}
                             />
                         </Fragment>
                     ))}
@@ -193,7 +194,7 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendB
                                 />
                             ))}
                             <div className={styles.connectionLabel}>
-                                ---------------- Connections
+                                ---------------- Connected To
                             </div>
                         </div>
                     ) : null}
@@ -216,7 +217,7 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendB
                                 />
                             ))}
                             <div className={`${styles.connectionLabel} ${styles.connectionLabelBottom}`}>
-                                ---------------- Connections
+                                ---------------- Connected To
                             </div>
                         </div>
                     ) : null}

@@ -111,7 +111,6 @@ const NoteBox = ({ graphState: [graph, setGraph], notebooksState: [notebooks, se
 
         // Deletes on backend
         axios.delete('/api/notebooks/' + notebook.id + '/delete').then((response) => {
-            alert(response);
             console.log(response);
         });
 

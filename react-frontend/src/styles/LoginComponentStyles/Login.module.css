@@ -53,6 +53,7 @@ html {
 .label {
 	color: white;
 	font-family: Corbel Light;
+	background-color: gray;
 }
 
 input[type="text"], input[type="password"] {
@@ -71,9 +72,9 @@ input[type="button"] {
 .linksContainer {
 	white-space: nowrap;
 	position: absolute;
-	top: 80%;
 	left: 50%;
 	transform: translateX(-50%);
+	margin-top: 108px;
 }
 
 .link {

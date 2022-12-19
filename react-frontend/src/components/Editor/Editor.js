@@ -34,7 +34,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 		// Initializes values
 		} else if (typeof initialGraphValues.loadedSize === 'boolean') {
 			
-			const index = graph.getVertex(graph.size() - 1).id === -1 
+			const index = graph.getVertex(graph.size() - 1)?.id === -1 
 				? graph.size() - 1 // Add Note button clicked, which just added a new note before mounting
 				: graph.size(); // Navigated otherwise
 
@@ -148,7 +148,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 			const title = String(noteInEditor.title);
 			let updatingNote = { 
 				...noteInEditor, 
-				title: (title[title.length - 1] === '﻿') ? title.slice(0, -1) : title,
+				title: (title[0] === '﻿') ? title.slice(1) : title,
 				idNotebook: Number(notebookId),
 			};
 
@@ -189,7 +189,10 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 			// Updating a note
 			} else {
 				// On frontend (note)
-				if (e) setNoteInEditor(updatingNote); // Only updates if button clicked (not other note selected)
+				if (e) {
+					setNoteInEditor(updatingNote); // Only updates if button clicked (not other note selected)
+					setSelected({ note: updatingNote, index: index });
+				}
 				graph.updateVertex(updatingNote);
 
 				// On backend (note)
@@ -339,28 +342,27 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 
 		if (id < 0) {
 			// Determines note index: O(1) if negative (an unsaved new note)
-			console.log('index', initialGraphValues.loadedSize - 1 + Math.abs(id));
+			// console.log('index', initialGraphValues.loadedSize - 1 + Math.abs(id));
 			note = graph.getVertex(initialGraphValues.loadedSize - 1 + Math.abs(id));
-			console.log('negative index', note);
-			console.log('the negative index', initialGraphValues.loadedSize - 1 + Math.abs(id));
+			// console.log('negative index', note);
+			// console.log('the negative index', initialGraphValues.loadedSize - 1 + Math.abs(id));
 		} else if (id <= initialGraphValues.highestId) {
 			// Binary searches for the note: O(log initial-n)
 			let vertices = graph.getVertices();
 			vertices.length = initialGraphValues.loadedSize;
 			note = binarySearch(vertices, id)[0];
-			console.log('binary sort', note);
+			//console.log('binary sort', note);
 		} else {
 			// Note is newly created and searches within new note indices: O(m)
-			console.log('initialGraphValues.loadedSize', initialGraphValues.loadedSize);
-			console.log('graphSize', graph.size());
+			// console.log('initialGraphValues.loadedSize', initialGraphValues.loadedSize);
+			// console.log('graphSize', graph.size());
 			for (let i = initialGraphValues.loadedSize, size = graph.size(); i < size; i++) {
 				const n = graph.getVertex(i);
-				console.log(n);
 				if (Number(n.id) === Number(id)) {
 					note = n;
 				}
 			}
-			console.log('in new notes', note);
+			// console.log('in new notes', note);
 		}
 		
 		return (note !== false && note !== []) ? note : null;
@@ -371,6 +373,20 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 		e.target.setSelectionRange(0, e.target.value.length); // For mobile safari
 	};
 
+	const onTitleKeyDown = (e) => {
+		if (e.key === 'Enter') {
+			textRef.current.focus(); 
+			e.preventDefault();
+		}
+	}
+
+	const onTextKeyDown = (e) => {
+		if (e.key === 'Backspace' && e.target.value === '') {
+			titleRef.current.focus();
+			e.preventDefault();
+		}
+	}
+
 	const onInputChange = (e) => {
 
 		let updated = {};
@@ -378,15 +394,15 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 			[styles.notebook]: () => setNotebookName(e.target.value),
 			[styles.title]: () => {
 				setNoteInEditor({ ...noteInEditor, title: e.target.value });
-				updated = { title: e.target.value }
+				updated = { title: e.target.value };
 			},
 			[styles.text]: () => {
 				setNoteInEditor({ ...noteInEditor, text: e.target.value });
-				updated = { text: e.target.value }
+				updated = { text: e.target.value };
 			},
 			[styles.quotes]: () => {
 				setNoteInEditor({ ...noteInEditor, quotes: e.target.value });
-				updated = { quotes: e.target.value }
+				updated = { quotes: e.target.value };
 			},
 		})[e.target.id]();
 
@@ -432,7 +448,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
     return (
         <form className={styles.form}>
 			<div className={styles.flexRow}>
-				<img src={notebookIcon} alt="" />
+				<img id={styles.notebookIcon} src={notebookIcon} alt="" />
 				<input 
 					type="text" 
 					list="notebookOptions" 
@@ -460,16 +476,17 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 						placeholder="Title" 
 						value={noteInEditor.title ?? ''}
 						onChange={onInputChange}
+						onKeyDown={onTitleKeyDown}
 						onFocus={(e) => {if (noteInEditor.title === 'Untitled') selectAllText(e)}}
-						onKeyDown={(e) => {if (e.key === 'Enter') textRef.current.focus(); e.preventDefault()}}
 						ref={titleRef}
 					/>
 					<textarea 
 						id={styles.text} 
 						className={styles.editorTextInputs} 
-						placeholder="..." 
+						placeholder="" 
 						value={noteInEditor.text ?? ''}
 						onChange={onInputChange}
+						onKeyDown={onTextKeyDown}
 						onFocus={(e) => {if (noteInEditor.text === '-') selectAllText(e)}}
 						ref={textRef}
 					/>
@@ -523,7 +540,7 @@ const Editor = ({ selectedState: [{ note, index }, setSelected], userId, onMount
 
 			<input 
 				type="button" 
-				id="addUpdate" 
+				id={styles.addUpdate}
 				value={note?.id < 0 ? "Add Note" : "Update Note"} 
 				onClick={updateOnBackFront}
 			/>

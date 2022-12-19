@@ -40,7 +40,7 @@
 }
 
 .connectionNoteWall {
-    background-color: lightskyblue;
+    background-color: darkblue;
     border: 1px solid;
     z-index: 5;
 }

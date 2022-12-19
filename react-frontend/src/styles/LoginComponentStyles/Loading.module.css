@@ -13,7 +13,7 @@
     overflow: hidden;
     border-radius: 10px;
 	padding: 2rem;
-    z-index: 0;
+    /* z-index: 0; */
 }
 
 .loadingCenterContainer::before {
@@ -45,22 +45,22 @@
 }
 
 .loadingIcon {
-    background: url(../../resources/loadingGif3.gif);
+    background: url(../../resources/journalOpen2.gif);
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 300px;
+    background-size: 400px 300px;
+    width: 400px;
+    height: 300px;
+    margin-top: -35px;
 }
 
 .text {
-    position: absolute;
-    margin-top: 20px;
+    margin-top: -35px;
     color: black;
     transition: 1s;
 }
 
 .link {
-    position: absolute;
-    margin-top: 50px;
     color: #00BFFF;
     transition: 1s;
 }

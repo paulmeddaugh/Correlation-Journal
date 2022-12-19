@@ -14,7 +14,12 @@ const AddNoteButton = ({ onClick }) => {
     };
 
     return (
-        <Link to='/editor' id={styles.add} onClick={clicked}></Link>
+        <Link 
+            to='/editor' 
+            id={styles.add} 
+            className={location.pathname === '/editor' ? styles.brownIcon : styles.whiteIcon} 
+            onClick={clicked}
+        />
     );
 }
 

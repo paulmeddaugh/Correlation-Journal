@@ -11,7 +11,7 @@ const STICKY_NOTE_SIZE = { width: 100, height: 100 };
 
 const NOTE_WALL_GAP = 465;
 const NOTE_WALL_X_START = 250;//'30%';
-const NOTE_WALL_Y_START = 285;//'40%';
+const NOTE_WALL_Y_START = window.innerHeight / 2 - 20;//'40%';
 
 const CENTER_LINE_X_OFFSET = 20;
 
@@ -34,37 +34,38 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected],
         };
 
         // Determines the center notes for each NoteWall: O(n)
-        for (let i = 0, deleteCount = 0, prevPointIndex = 0; i < arr.length - deleteCount; i++) {
+        let centerPointsArr = [], prevPointIndex = 0, arrLen = arr.length;
+        for (let i = 0, deleteCount = 0; i < arrLen - deleteCount; i++) {
 
             // Base filter that the centering note either must be 'main' or have no connections
             let filtering = (arr[i].main === true || graph.getVertexNeighbors(i).length === 0) 
                 ? false : true;
 
             // Any selected custom filters
-            for (let type in filters) {
-                filtering = (!filtersMap[type](arr[i], filters[type])) ? true : filtering;
+            if (!filtering) for (let type in filters) {
+                filtering = (!filtersMap[type](arr[i], filters[type]));
             }
 
             if (filtering) {
-                arr.splice(i -= 1, 1);
+                arr.splice(i--, 1);
                 deleteCount++;
             } else {
                 // Dynamically creates centerPoint list
-                const cenLen = centerPoints.length;
-                centerPoints.push((cenLen === 0) 
+                const cenLen = centerPointsArr.length;
+                centerPointsArr.push((cenLen === 0) 
                     ? new Point(NOTE_WALL_X_START, NOTE_WALL_Y_START) // Starting point if empty
-                    : new Point(centerPoints[cenLen - 1].x + // Determines next from the last
+                    : new Point(centerPointsArr[cenLen - 1].x + // Determines next from the last
                         (graph.getVertexNeighbors(prevPointIndex).length === 0 ? NOTE_WALL_GAP * .8 : NOTE_WALL_GAP),
                         NOTE_WALL_Y_START
                 ));
                 prevPointIndex = i + deleteCount;
-                scrollToMap.set(arr[i].id, centerPoints[cenLen]); // Adds point as the scrollTo point 
-                arr[i] = { note: arr[i], index: i }; // Stores the note and index
+                scrollToMap.set(arr[i].id, centerPointsArr[cenLen]); // Adds point as the scrollTo point 
+                arr[i] = { note: arr[i], index: i + deleteCount }; // Stores the note and index
             }
         }
 
         setIndependentNotes(arr.concat());
-        setCenterPoints(centerPoints.concat());
+        setCenterPoints(centerPointsArr.concat());
         
     }, [graph, filters]);
 
@@ -84,8 +85,8 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected],
 
     // Determines position of the lines that connect each centered, or 'independent,' note
     const lineOrigin = (i) => {
-        const { x: left, y: top } = getCenterPoint(i);
-        return { left, top: top + CENTER_LINE_X_OFFSET };
+        const { x: left, y: top } = getCenterPoint(i) || {};
+        return left !== undefined ? { left, top: top + CENTER_LINE_X_OFFSET } : {};
     }
 
     const getConnectingNotes = (graphIndex) => {
@@ -110,8 +111,8 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected],
 
     const onConnectionClick = (note, index, point, centerNote, onCloseHandler) => {
 
-        const selected = { note: note, index: index, scrollTo: false };
-        setSelected(selected);
+        const selectedObj = { note: note, index: index, scrollTo: false };
+        // setSelected(selectedObj);
 
         // Smooth scrolls to the connected note
         const { width, left } = journalWallRef.current.getBoundingClientRect();
@@ -140,13 +141,14 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected],
 
     return (
         <div className={styles.main} ref={journalWallRef} tabIndex={200}>
-            {independentNotes?.map((noteAndIndex, i) => (
+            {independentNotes?.map((noteAndIndex, i) => getCenterPoint(i) ? (
                 <Fragment key={i}>
                     <Line 
                         length={NOTE_WALL_GAP} 
                         rotateOrigin={lineOrigin(i)} 
                         animation={false}
-                        dashed={true}
+                        color={'#9a2e30'}
+                        thickness={3}
                     />
                     <NoteWall 
                         noteAndIndex={noteAndIndex}
@@ -159,7 +161,7 @@ const JournalWall = ({ graph, notebooks, selectedState: [selected, setSelected],
                         selected={selected}
                     />
                 </Fragment>
-            ))}
+            ) : null)}
         </div>
     )
 }

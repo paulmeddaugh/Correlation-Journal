@@ -18,7 +18,7 @@
 
 #searchBar { /* Container for searchingFor */
     border-bottom: 1px solid grey;
-    padding: 8px 10px;
+    padding: 8px;
     background: lightgrey;
 }
 
@@ -48,7 +48,7 @@
 #unpin {
     padding: 2px;
     margin-left: 6px;
-    margin-right: -4px;
+    margin-right: -1px;
     display: inherit;
 }
 
@@ -75,7 +75,7 @@ img {
 #pin {
     display: none;
     position: absolute;
-    top: 30%;
+    top: 20%;
     left: 0%;
     background: lightgrey;
     transform-origin: bottom left;

@@ -11,13 +11,15 @@ const NoteBoxNotebook = ({ notebook, liftSelectProps, onDeleteClick }) => {
         });
     };
 
-    const deleteNotebook = () => {
+    const deleteNotebook = (e) => {
         if (!window.confirm("Are you sure you want to delete notebook '" + notebook.name + "' and all of its notes?")) {
             return;
         }
 
         // Delete on frontend
         onDeleteClick(notebook);
+
+        e.preventDefault();
     };
 
     return (
