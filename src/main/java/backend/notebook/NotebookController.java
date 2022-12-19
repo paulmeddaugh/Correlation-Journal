@@ -3,6 +3,8 @@ package backend.notebook;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.LoadDatabase;
+import backend.connection.ConnectionRepository;
 import backend.note.NoteRepository;
 
 @RestController
@@ -27,14 +30,16 @@ public class NotebookController {
     
     private final NotebookRepository repository;
     private final NoteRepository noteRepository;
+    private final ConnectionRepository connRepository;
     private final NotebookModelAssembler assembler;
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
     
     NotebookController(NotebookRepository repository, NotebookModelAssembler assembler,
-            NoteRepository noteRepository) {
+            NoteRepository noteRepository, ConnectionRepository connRepo) {
         this.repository = repository;
         this.assembler = assembler;
         this.noteRepository = noteRepository;
+        this.connRepository = connRepo;
     }
     
     // Aggregate root
@@ -79,10 +84,14 @@ public class NotebookController {
     }
     
     @DeleteMapping("/notebooks/{id}/delete")
-    void deleteNotebook(@PathVariable Long id) {
-        
+    @Transactional
+    public void deleteNotebook(@PathVariable Long id) {
         noteRepository.findByIdNotebook((int) (long) id)
-                .forEach(note -> noteRepository.delete(note));
+                .forEach(note -> {
+                    noteRepository.delete(note);
+                    int noteId = (int)(long) note.getId();
+                    connRepository.deleteByIdNote1OrIdNote2(noteId, noteId);
+                });
         repository.deleteById(id);
     }
     

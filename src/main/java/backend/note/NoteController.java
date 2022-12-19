@@ -3,6 +3,8 @@ package backend.note;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.LoadDatabase;
+import backend.connection.ConnectionRepository;
 import backend.notebook.Notebook;
 import backend.notebook.NotebookController;
 
@@ -27,12 +30,15 @@ import backend.notebook.NotebookController;
 public class NoteController {
     
     private final NoteRepository repository;
+    private final ConnectionRepository connRepository;
     private final NoteModelAssembler assembler;
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
     
-    NoteController(NoteRepository repository, NoteModelAssembler assembler) {
+    NoteController(NoteRepository repository, NoteModelAssembler assembler,
+            ConnectionRepository connRepo) {
         this.repository = repository;
         this.assembler = assembler;
+        this.connRepository = connRepo;
     }
     
     // Aggregate root
@@ -82,8 +88,10 @@ public class NoteController {
     }
     
     @DeleteMapping("/notes/{id}/delete")
-    void deleteNote(@PathVariable Long id) {
+    @Transactional
+    public void deleteNote(@PathVariable Long id) {
         repository.deleteById(id);
+        connRepository.deleteByIdNote1OrIdNote2((int)(long) id,(int)(long) id);
     }
     
     // All of a user's notes

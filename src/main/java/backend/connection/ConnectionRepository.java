@@ -11,5 +11,6 @@ import backend.notebook.Notebook;
 public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     List<Connection> findByIdNote1AndIdNote2AndIdUser(int idNote1, int idNote2, int idUser);
     List<Connection> deleteByIdNote1AndIdNote2AndIdUser(int idNote1, int idNote2, int idUser);
+    List<Connection> deleteByIdNote1OrIdNote2(int idNote1, int idNote2);
     List<Connection> findByIdUser(int idUser);
 }

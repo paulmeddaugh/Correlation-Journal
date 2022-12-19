@@ -3,6 +3,7 @@ package backend.note;
 import java.util.Date;
 import java.util.Objects;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,7 +15,7 @@ import javax.persistence.Table;
 public class Note {
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
     private String title;
-    private String text;
+    @Column(columnDefinition = "LONGTEXT") private String text;
     private String quotes;
     private int idNotebook;
     private int idUser;
