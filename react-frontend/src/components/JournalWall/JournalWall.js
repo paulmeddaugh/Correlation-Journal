@@ -9,7 +9,7 @@ import Line from "./Line";
 const MAIN_NOTE_SIZE = { width: 100, height: 100 };
 const STICKY_NOTE_SIZE = { width: 100, height: 100 };
 
-const NOTE_WALL_GAP = 465;
+const NOTE_WALL_GAP = 435;
 const NOTE_WALL_X_START = 250;//'30%';
 const NOTE_WALL_Y_START = window.innerHeight / 2 - 20;//'40%';
 

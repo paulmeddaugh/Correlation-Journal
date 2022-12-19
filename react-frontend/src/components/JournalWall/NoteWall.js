@@ -61,7 +61,7 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendB
             if (noteRefs.current[i].style?.top === '') {
                 if (noteRefs.current[i].id) {
                     const { left: noteLeft, top: noteTop } = noteRefs.current[i].getBoundingClientRect();
-                    const { left: parentLeft } = noteWallRef.current.getBoundingClientRect();
+                    const { left: parentLeft, top: parentTop } = noteWallRef.current.getBoundingClientRect();
                     noteRefs.current[i] = { // Replaces ref with its last position styling
                         left: noteLeft - parentLeft + NOTE_CENTER_MAIN_X, 
                         top: noteTop - NOTE_CENTER_MAIN_Y,
@@ -194,7 +194,7 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendB
                                 />
                             ))}
                             <div className={styles.connectionLabel}>
-                                ---------------- Connected To
+                                ---------------- Connections
                             </div>
                         </div>
                     ) : null}
@@ -217,7 +217,7 @@ const NoteWall = ({ noteAndIndex, centerPoint, connectingNotes, onMount, extendB
                                 />
                             ))}
                             <div className={`${styles.connectionLabel} ${styles.connectionLabelBottom}`}>
-                                ---------------- Connected To
+                                ---------------- Connections
                             </div>
                         </div>
                     ) : null}

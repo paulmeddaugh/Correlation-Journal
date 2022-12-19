@@ -26,6 +26,7 @@
 .mainNote:hover .noteText, .stickyNote:hover .noteText {
     opacity: 1;
     display: block;
+    overflow-y: overlay;
 }
 
 .stickyNote {
@@ -64,7 +65,6 @@
     font-size: 11pt;
     transition: .5s ease;
     animation: fadeIn .75s;
-    overflow-y: overlay;
     flex: 1;
 }
 
